@@ -46,3 +46,5 @@ nosetests.xml
 *.dll
 *.zip
 *.msi
+*.tmp
+static/images/*
