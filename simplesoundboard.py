@@ -1,6 +1,8 @@
 import pygame
-import cherrypy
 import glob
+from flask import Flask
+
+app = Flask(__name__)
 
 pygame.mixer.init()
 
@@ -12,22 +14,21 @@ page=""
 for name in filenames:
 	page= page + "<a href='/play/%s'>%s</a><br>"% (name,name)
 print page
-class HitzBoard(object):
-	
-	def index(self):
-		
-		return page
-	index.exposed = True
-	
-	def play(self, name):
-		pygame.mixer.music.load(name)
-		pygame.mixer.music.play()
-		return page
-	play.exposed = True
 
-cherrypy.quickstart(HitzBoard())
+
+@app.route("/")
+def index():
+	return page
+	
+@app.route("/play/<name>")
+def play(name):
+	pygame.mixer.music.load(name)
+	pygame.mixer.music.play()
+	return page
+
+
 
 
 if __name__ == '__main__':
-	cherrypy.server.socket_host='0.0.0.0'
-	cherrypy.quickstart(HitzBoard())
+	app.debug = True
+	app.run(host='0.0.0.0')
