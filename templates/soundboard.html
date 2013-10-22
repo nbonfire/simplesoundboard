@@ -1,13 +1,53 @@
 {% extends "base.html" %}
-{% block title %}Game Night{% endblock %}
+{% block title %}Game Night Soundboard{% endblock %}
 {% block body %}
 	<div class="container">
-		<div class="row">
-			{% for filename in filenames %}
-			<div class="col-lg-4">
+	{% for filenames in filenamesandcategories %}
+		<div class="row"><div class="col-xs-12 col-md-12 col-lg-12"><h3>{{ filenames['category'] }}</h3></div>
+			{% for filename in filenames['files'] %}
+			<div class="col-xs-4 col-md-4 col-lg-4">
 
-				<button class="sound" value="{{filename}}" href="#">{{filename}}</button>
+				<button class="sound btn btn-primary btn-block" value="{{filenames['category']}}/{{filename}}" href="#">{{filename}}</button>
 			</div>
 			{% endfor %}
 		</div>
+	{% endfor %}
+	</div>
+
+	<script type="text/javascript">
+	(function($) {
+  var IS_IOS = /iphone|ipad/i.test(navigator.userAgent);
+  $.fn.nodoubletapzoom = function() {
+    if (IS_IOS)
+      $(this).bind('touchstart', function preventZoom(e) {
+        var t2 = e.timeStamp
+          , t1 = $(this).data('lastTouch') || t2
+          , dt = t2 - t1
+          , fingers = e.originalEvent.touches.length;
+        $(this).data('lastTouch', t2);
+        if (!dt || dt > 500 || fingers > 1) return; // not double-tap
+
+        e.preventDefault(); // double tap - prevent the zoom
+        // also synthesize click events we just swallowed up
+        $(this).trigger('click').trigger('click');
+      });
+  };
+})(jQuery);
+		$(function(){
+			$('.sound').nodoubletapzoom();
+			$('.sound').click(function(){
+				var filepicked = $(this).val();
+				console.log(filepicked);
+				$.ajax({
+            		type: "GET",
+            		url: "/play/"+filepicked,
+            
+				});
+			});
+
+			
+			
+		})
+
+	</script>
 {% endblock %}
