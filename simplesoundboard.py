@@ -1,6 +1,6 @@
 import pygame
 import glob
-from flask import Flask
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
@@ -18,13 +18,13 @@ print page
 
 @app.route("/")
 def index():
-	return page
+	return render_template('soundboard.html', filenames=filenames)
 	
 @app.route("/play/<name>")
 def play(name):
 	pygame.mixer.music.load(name)
 	pygame.mixer.music.play()
-	return page
+	return "ok"
 
 
 

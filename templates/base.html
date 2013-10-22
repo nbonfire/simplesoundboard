@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<title>{% block title %}{% endblock%}</title>
+	<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
+	<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+   
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css">
+    
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/js/bootstrap.min.js"></script>
+    {% block head %}
+    {% endblock %}
+</head>
+<body>
+    {% block body %}
+    {% endblock %}
+</body>

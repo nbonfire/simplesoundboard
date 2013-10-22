@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Game Night{% endblock %}
+{% block body %}
+	<div class="container">
+		<div class="row">
+			{% for filename in filenames %}
+			<div class="col-lg-4">
+
+				<button class="sound" value="{{filename}}" href="#">{{filename}}</button>
+			</div>
+			{% endfor %}
+		</div>
+{% endblock %}
