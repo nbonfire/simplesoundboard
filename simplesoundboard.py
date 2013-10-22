@@ -6,9 +6,9 @@ app = Flask(__name__)
 
 pygame.mixer.init()
 
-filenames = glob.glob('*.wav')
+filenames = glob.glob('sounds/*.wav')
 print filenames
-filenames.extend(glob.glob('*.mp3'))
+filenames.extend(glob.glob('sounds/*.mp3'))
 print filenames
 page=""
 for name in filenames:
