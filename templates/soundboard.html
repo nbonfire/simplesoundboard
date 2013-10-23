@@ -1,9 +1,19 @@
 {% extends "base.html" %}
 {% block title %}Game Night Soundboard{% endblock %}
 {% block body %}
+
+  
+    
+  <!-- -->
+    
 	<div class="container">
+	<div class="row row-offcanvas row-offcanvas-right">
+        <div class="col-xs-12 col-sm-9">
+          <!--p class="pull-right visible-xs">
+            <button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas">Toggle nav</button>
+          </p-->
 	{% for filenames in filenamesandcategories %}
-		<div class="row"><div class="col-xs-12 col-md-12 col-lg-12"><h3>{{ filenames['category'] }}</h3></div>
+		<section id='{{filenames['category']}}'><div class="row"><!--div class="col-xs-12 col-md-12 col-lg-12"--><h3>{{ filenames['category'] }}</h3><!--/div-->
 			{% for filename in filenames['files'] %}
 			<div class="col-xs-4 col-md-4 col-lg-4">
 
@@ -11,11 +21,27 @@
 			</div>
 			{% endfor %}
 		</div>
+		</section>
 	{% endfor %}
 	</div>
+<!-- -->
+<div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">
+          <div class="well sidebar-nav">
+            <ul class="nav">
+      {% for category in filenamesandcategories %}
+        <li><a href="#{{ category['category']}}">{{ category['category']}}</a></li>
+      {% endfor %}
+      </ul>
 
+</div>
+  </div>
+</div>
+<!-- -->
+{% endblock %}
+{% block script %}
 	<script type="text/javascript">
 	(function($) {
+		
   var IS_IOS = /iphone|ipad/i.test(navigator.userAgent);
   $.fn.nodoubletapzoom = function() {
     if (IS_IOS)
@@ -34,6 +60,9 @@
   };
 })(jQuery);
 		$(function(){
+			$('[data-toggle=offcanvas]').click(function() {
+    		$('.row-offcanvas').toggleClass('active');
+  		});
 			$('.sound').nodoubletapzoom();
 			$('.sound').click(function(){
 				var filepicked = $(this).val();
@@ -50,4 +79,9 @@
 		})
 
 	</script>
+	<style type="text/css">
+		.well.sidebar-nav {
+			position: fixed;
+		}
+	</style>
 {% endblock %}
