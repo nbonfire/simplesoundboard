@@ -3,7 +3,7 @@ import glob
 import os
 from flask import Flask, render_template, url_for
 
-SERVER_NAME=0.0.0.0
+SERVER_NAME='0.0.0.0'
 SERVER_PORT=5000
 
 app = Flask(__name__)
