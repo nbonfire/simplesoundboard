@@ -3,6 +3,9 @@ import glob
 import os
 from flask import Flask, render_template, url_for
 
+SERVER_NAME='0.0.0.0'
+SERVER_PORT=5000
+
 app = Flask(__name__)
 
 pygame.mixer.init()
@@ -73,4 +76,4 @@ if __name__ == '__main__':
 
 	#sounds=dict(zip(map(os.path.basename,filenames),map(pygame.mixer.Sound,filenames)))
 	app.debug = True
-	app.run(host='0.0.0.0')
+	app.run(host=SERVER_NAME, port=SERVER_PORT)
