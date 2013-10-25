@@ -3,19 +3,37 @@
 {% block body %}
 
   
-    
-  <!-- -->
-    
+   
+   <!-- -->
+    <nav class="navbar navbar-default visible-xs" role="navigation">
+    	<div class="navbar-header">
+    	<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+    		<span class="sr-only">Toggle navigation</span>
+    		<span class="icon-bar"></span>
+    		<span class="icon-bar"></span>
+    		<span class="icon-bar"></span>
+    	</button>
+    	<a class="navbar-brand" href="#"><!--img src="/static/images/hitz.png"/-->HitzBoard</a>
+    	</div>
+    	<div class="collapse navbar-collapse navbar-ex1-collapse">
+    		<ul class="nav navbar-nav">
+    			{% for category in filenamesandcategories %}
+        		<li><a href="#{{ category['category']}}">{{ category['category']}}</a></li>
+      			{% endfor %}
+      		</ul>
+      	</div>
+
+    </nav>
 	<div class="container">
 	<div class="row row-offcanvas row-offcanvas-right">
-        <div class="col-xs-12 col-sm-9">
+        <div class="col-xs-12 col-sm-10">
           <!--p class="pull-right visible-xs">
-            <button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas">Toggle nav</button>
+            <button type="button" class="btn btn-primary btn-xs togglenav">Toggle nav</button>
           </p-->
 	{% for filenames in filenamesandcategories %}
 		<section id='{{filenames['category']}}'><div class="row"><!--div class="col-xs-12 col-md-12 col-lg-12"--><h3>{{ filenames['category'] }}</h3><!--/div-->
 			{% for filename in filenames['files'] %}
-			<div class="col-xs-4 col-md-4 col-lg-4">
+			<div class="col-xs-12 col-md-6 col-lg-6">
 
 				<button class="sound btn btn-primary btn-block" value="{{filenames['category']}}/{{filename}}" href="#">{{filename}}</button>
 			</div>
@@ -25,7 +43,7 @@
 	{% endfor %}
 	</div>
 <!-- -->
-<div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">
+<div class="col-xs-6 col-sm-2 sidebar-offcanvas togglenav" id="sidebar" role="navigation">
           <div class="well sidebar-nav">
             <ul class="nav">
       {% for category in filenamesandcategories %}
@@ -60,8 +78,9 @@
   };
 })(jQuery);
 		$(function(){
-			$('[data-toggle=offcanvas]').click(function() {
-    		$('.row-offcanvas').toggleClass('active');
+			$('.togglenav').click(function() {
+    		$('.sidebar-offcanvas').toggleClass('active');
+    		console.log('does this click even work?');
   		});
 			$('.sound').nodoubletapzoom();
 			$('.sound').click(function(){
@@ -82,6 +101,9 @@
 	<style type="text/css">
 		.well.sidebar-nav {
 			position: fixed;
+			padding-left: 0px;
+			padding-right: 0px;
 		}
+
 	</style>
 {% endblock %}
