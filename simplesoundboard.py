@@ -10,39 +10,6 @@ app = Flask(__name__)
 
 pygame.mixer.init()
 
-"""
-from MediaInfoDLL import MediaInfo, Stream
-from pydub import AudioSegment
-import shutil
-
-MI = MediaInfo()
-
-def fixSounds():
-	filenamestofix = glob.glob('incoming/*.wav')
-	filenamestofix.extend(glob.glob('incoming/*.mp3'))
-	basenamestofix=[os.path.basename(a) for a in filenamestofix]
-	tocopy=[]
-	toconvert=[]
-	for wav in basenamestofix:
-		a=MI.Open(os.path.join('incoming',wav))
-		print wav
-		audioformat=MI.Get(Stream.Audio,0,'Format')
-		if audioformat =='PCM':
-			#copy to sounds folder
-			shutil.move(os.path.join('incoming',wav), os.path.join('sounds',wav))
-			tocopy.append(wav)
-		else:
-			#convert to PCM, then copy to sounds folder
-
-			#converted=AudioSegment.from_mp3(os.path.join('incoming',wav))
-			#converted.export(os.path.join('sounds',wav[:4]+".wav"),format="wav")
-			toconvert.append(wav)
-	print "Needs converted: %s" % toconvert
-	print "Copied without conversion: %s" % tocopy
-
-			
-
-"""
 
 @app.route("/")
 def index():
