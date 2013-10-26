@@ -25,7 +25,11 @@ def play(category,name):
 	return "ok"
 
 
-
+def stripfilename(filename):
+	
+	noextension=os.path.splitext(filename)[0]
+	separateCamelCase = re.sub(r'((?<=[a-z])[A-Z]|(?<!\A)[A-Z](?=[a-z]))', r' \1', noextension)
+	return separateCamelCase.replace("_"," ")
  
 if __name__ == '__main__':
 	#fixSounds()
@@ -36,7 +40,7 @@ if __name__ == '__main__':
 
 	filenamesdictlist=[{'category':os.path.basename(os.path.dirname(a)), 'file':os.path.basename(a)} for a in filenames]
 	categories=set([a['category'] for a in filenamesdictlist])
-	categoriesAndTheirFiles=[{'category':x, 'files':[y['file'] for y in filenamesdictlist if y['category']==x]} for x in categories]
+	categoriesAndTheirFiles=[{'category':x, 'sounds':[{'file': y['file'], 'name': stripfilename(y['file'])} for y in filenamesdictlist if y['category']==x]} for x in categories]
 	#basenames=[os.path.basename(a) for a in filenames]
 	print filenames
 
