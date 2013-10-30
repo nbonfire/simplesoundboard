@@ -69,10 +69,11 @@ def get_or_create(session, model, **kwargs):
 
 @app.route("/")
 def index():
-	return render_template('soundboard.html', filenamesandcategories=categoriesAndTheirFiles, jqueryurl=url_for('static', filename='js/jquery.min.js'))
+	tagsandsounds=[{'category':x, 'sounds':[{'file': y.filename, 'name':y.name} for y in x.sounds]} for x in db.session.query(Tag).all()]
+	return render_template('soundboard.html', filenamesandcategories=tagsandsounds, jqueryurl=url_for('static', filename='js/jquery.min.js'))
 	
 @app.route("/play/<name>")
-def play(category,name):
+def play(name):
 	name=os.path.join('sounds', name)
 	#print name
 	pygame.mixer.music.load(name)
@@ -99,9 +100,9 @@ if __name__ == '__main__':
 	print filenames
 	
 
-	filenamesdictlist=[{'category':os.path.basename(os.path.dirname(a)), 'file':os.path.basename(a)} for a in filenames]
-	categories=set([a['category'] for a in filenamesdictlist])
-	categoriesAndTheirFiles=[{'category':x, 'sounds':[{'file': y['file'], 'name': stripfilename(y['file'])} for y in filenamesdictlist if y['category']==x]} for x in categories]
+	#filenamesdictlist=[{'category':os.path.basename(os.path.dirname(a)), 'file':os.path.basename(a)} for a in filenames]
+	#categories=set([a['category'] for a in filenamesdictlist])
+	#categoriesAndTheirFiles=[{'category':x, 'sounds':[{'file': y['file'], 'name': stripfilename(y['file'])} for y in filenamesdictlist if y['category']==x]} for x in categories]
 	#basenames=[os.path.basename(a) for a in filenames]
 	print filenames
 
