@@ -49,16 +49,23 @@ class Sound(db.Model):
 	def __str__(self):
 		return self.name
 
-
 class SoundModelView(ModelView):
+	column_display_all_relations=True
+	column_list = ('name', 'tags')
 	form_excluded_columns = ('name')
+	
 	def on_model_change(self, form, model, is_created):
 		
-		
-		
+
 		if is_created==True:
 			model.name=stripfilename(model.filename)
+		self.session.add(model)
 
+class SoundFileAdmin(FileAdmin):
+	allowed_extensions=('wav', 'mp3', 'ogg')
+	def on_file_upload(self, directory, path, filename):
+		db.session.add(Sound(filename=filename))
+		db.session.commit()
 
 def get_or_create(session, model, **kwargs):
 	instance = session.query(model).filter_by(**kwargs).first()
@@ -95,24 +102,18 @@ admin = Admin(app, name='HitzBoard Admin')
 
 admin.add_view(SoundModelView(Sound, db.session))
 admin.add_view(ModelView(Tag, db.session))
-admin.add_view(FileAdmin(os.path.join(os.path.dirname(__file__), 'sounds'), '/sounds/', name = 'Sound Files'))
+admin.add_view(SoundFileAdmin(os.path.join(os.path.dirname(__file__), 'sounds'), '/sounds/', name = 'Sound Files'))
 
 if __name__ == '__main__':
 	#fixSounds()
 	filenames = glob.glob('sounds/*.wav')
 	filenames.extend(glob.glob('sounds/*.mp3'))
-	print filenames
+	#print filenames
 	
-
-	#filenamesdictlist=[{'category':os.path.basename(os.path.dirname(a)), 'file':os.path.basename(a)} for a in filenames]
-	#categories=set([a['category'] for a in filenamesdictlist])
-	#categoriesAndTheirFiles=[{'category':x, 'sounds':[{'file': y['file'], 'name': stripfilename(y['file'])} for y in filenamesdictlist if y['category']==x]} for x in categories]
-	#basenames=[os.path.basename(a) for a in filenames]
-	print filenames
 
 	for filename in filenames:
 		afile=get_or_create(db.session, Sound, filename=filename)
 
 	#sounds=dict(zip(map(os.path.basename,filenames),map(pygame.mixer.Sound,filenames)))
-	app.debug = True
+	#app.debug = True
 	app.run(SERVER_NAME, SERVER_PORT)
