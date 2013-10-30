@@ -7,6 +7,7 @@ from flask.ext.admin import Admin, BaseView, expose
 
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.admin.contrib.sqla import ModelView
+from flask.ext.admin.contrib.fileadmin import FileAdmin
 
 SERVER_NAME='0.0.0.0'
 SERVER_PORT=5000
@@ -45,6 +46,8 @@ class Sound(db.Model):
 				self.name = stripfilename(filename)
 			else:
 				self.name = name
+	def __str__(self):
+		return self.name
 
 
 class SoundModelView(ModelView):
@@ -69,7 +72,7 @@ def get_or_create(session, model, **kwargs):
 
 @app.route("/")
 def index():
-	tagsandsounds=[{'category':x, 'sounds':[{'file': y.filename, 'name':y.name} for y in x.sounds]} for x in db.session.query(Tag).all()]
+	tagsandsounds=[{'category':x, 'sounds':[{'file': y.filename, 'name':y.name} for y in x.sounds]} for x in db.session.query(Tag).all() ]
 	return render_template('soundboard.html', filenamesandcategories=tagsandsounds, jqueryurl=url_for('static', filename='js/jquery.min.js'))
 	
 @app.route("/play/<name>")
@@ -92,6 +95,7 @@ admin = Admin(app, name='HitzBoard Admin')
 
 admin.add_view(SoundModelView(Sound, db.session))
 admin.add_view(ModelView(Tag, db.session))
+admin.add_view(FileAdmin(os.path.join(os.path.dirname(__file__), 'sounds'), '/sounds/', name = 'Sound Files'))
 
 if __name__ == '__main__':
 	#fixSounds()

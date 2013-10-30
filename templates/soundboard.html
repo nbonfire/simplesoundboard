@@ -18,8 +18,10 @@
     	<div class="collapse navbar-collapse navbar-ex1-collapse">
     		<ul class="nav navbar-nav">
     			{% for category in filenamesandcategories %}
+          {% if category['sounds']|length()>0 %}
         		<li><a href="#{{ category['category']}}">{{ category['category']}}</a></li>
-      			{% endfor %}
+      			{% endif %}
+            {% endfor %}
       		</ul>
       	</div>
 
@@ -31,6 +33,7 @@
             <button type="button" class="btn btn-primary btn-xs togglenav">Toggle nav</button>
           </p-->
 	{% for filenames in filenamesandcategories %}
+  {% if filenames['sounds']|length()>0 %}
 		<section id='{{filenames['category']}}'><div class="row"><!--div class="col-xs-12 col-md-12 col-lg-12"--><h3>{{ filenames['category'] }}</h3><!--/div-->
 			{% for sound in filenames['sounds'] %}
 			<div class="col-xs-12 col-md-6 col-lg-6">
@@ -40,6 +43,7 @@
 			{% endfor %}
 		</div>
 		</section>
+  {% endif %}
 	{% endfor %}
 	</div>
 <!-- -->
@@ -47,7 +51,9 @@
           <div class="well sidebar-nav">
             <ul class="nav">
       {% for category in filenamesandcategories %}
+      {% if category['sounds']|length()>0 %}
         <li><a href="#{{ category['category']}}">{{ category['category']}}</a></li>
+        {% endif %}
       {% endfor %}
       </ul>
 
