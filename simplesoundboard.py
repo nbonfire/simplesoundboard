@@ -13,7 +13,7 @@ SERVER_NAME='0.0.0.0'
 SERVER_PORT=5000
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///soundboardtags.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///soundboardtags.sqlite'
 app.config['SECRET_KEY'] = '123456790'
 db = SQLAlchemy(app)
 
