@@ -38,7 +38,7 @@ class ThemeSong(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	filename=db.Column(db.String(120))
 	name=db.Column(db.String(120))
-	users=relationship("User", backref='themesong')
+	users=db.relationship("User", backref='themesong')
 	def __init__(self, filename=None, name=None):
 		if filename==None:
 			print "filename is none for some reason. %s" % self
