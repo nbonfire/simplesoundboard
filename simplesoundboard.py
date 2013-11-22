@@ -18,6 +18,7 @@ app.config['SECRET_KEY'] = '123456790'
 db = SQLAlchemy(app)
 
 pygame.mixer.init()
+fxchannel=pygame.mixer.Channel(1)
 
 sound_tags_table = db.Table('sound_tags', db.Model.metadata,
 						db.Column('sound_id', db.Integer, db.ForeignKey('sound.id')),
@@ -86,8 +87,9 @@ def index():
 def play(name):
 	name=os.path.join('sounds', name)
 	#print name
-	pygame.mixer.music.load(name)
-	pygame.mixer.music.play()
+	fxchannel.play(Sound(name))
+	#pygame.mixer.music.load(name)
+	#pygame.mixer.music.play()
 	##sounds[name].play()
 	return "ok"
 
