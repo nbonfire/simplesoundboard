@@ -4,6 +4,8 @@ import os
 from flask.ext.login import LoginManager
 from flask.ext.openid import OpenID
 from flask.ext.admin import Admin
+from flask.ext.script import Manager 
+from flask.ext.migrate import Migrate, MigrateCommand
 from config import basedir, ADMINS, MAIL_SERVER, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD
 
 app = Flask(__name__)
@@ -28,6 +30,9 @@ if not app.debug:
     app.logger.info('soundboard startup')
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)
 
 lm = LoginManager()
 lm.init_app(app)
@@ -39,15 +44,7 @@ admin = Admin(app, name='HitzBoard Admin')
 
 from app import views, models
 
-def get_or_create(model, **kwargs):
-	instance = db.session.query(model).filter_by(**kwargs).first()
-	if instance:
-		return instance
-	else:
-		instance = model(**kwargs)
-		db.session.add(instance)
-		db.session.commit()
-		return instance
+
 
 soundfilenames = glob.glob('sounds/*.wav')
 soundfilenames.extend(glob.glob('sounds/*.mp3'))
