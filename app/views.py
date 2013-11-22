@@ -1,25 +1,32 @@
 import pygame
 from flask import render_template, flash, redirect, session, url_for, request, g
 from flask.ext.login import login_user, logout_user, current_user, login_required
+from flask.ext.admin import Admin, BaseView, expose
+from flask.ext.admin.contrib.sqla import ModelView
+from flask.ext.admin.contrib.fileadmin import FileAdmin
 from app import app, db, lm, oid, admin
 from forms import LoginForm
-from models import User, ROLE_USER, ROLE_ADMIN
+from models import *
 from datetime import datetime
-from decorators import login_required, async
+from decorators import async
 from config import basedir
 
 pygame.mixer.init()
 fxchannel=pygame.mixer.Channel(1)
 SONG_END = pygame.USEREVENT + 1
 pygame.mixer.music.set_endevent(SONG_END)
-resume_volume()
-
+pygame.init()
 @async
 def resume_volume():
 	while True:
+
 		for event in pygame.event.get():
 			if event.type == SONG_END and not pygame.mixer.music.get_busy():
 				print "the song ended, resume xbmc volume"
+
+resume_volume() # somehow set the xbmc volume back up
+
+
 
 @app.before_request
 def before_request():

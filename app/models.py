@@ -38,7 +38,7 @@ class ThemeSong(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	filename=db.Column(db.String(120))
 	name=db.Column(db.String(120))
-	users=db.relationship("User", backref='themesong')
+	users=db.relationship("User", backref=db.backref('themesong', lazy='dynamic')
 	def __init__(self, filename=None, name=None):
 		if filename==None:
 			print "filename is none for some reason. %s" % self
@@ -56,7 +56,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     nickname = db.Column(db.String(64), unique = True)
     email = db.Column(db.String(120), index = True, unique = True)
-    role = db.Column(db.SmallInteger, default = ROLE_USER)
+    urole = db.Column(db.SmallInteger, default = ROLE_USER)
     #posts = db.relationship('Post', backref = 'author', lazy = 'dynamic')
     themesong_id=db.ForeignKey('themesong.id')
     about_me = db.Column(db.String(140))
@@ -75,7 +75,10 @@ class User(db.Model):
         return True
 
     def is_admin(self):
-    	return bool(self.role == "ADMIN")
+    	return bool(self.urole == "ADMIN")
+
+    def get_urole(self):
+        return self.urole
 
     def is_active(self):
         return True

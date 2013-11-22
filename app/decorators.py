@@ -6,6 +6,7 @@ def async(f):
         thr.start()
     return wrapper
 
+"""
 def login_required(role="ANY"):
     def wrapper(fn):
         @wraps(fn)
@@ -18,4 +19,4 @@ def login_required(role="ANY"):
                 return current_app.login_manager.unauthorized()      
             return fn(*args, **kwargs)
         return decorated_view
-    return wrapper
+    return wrapper"""
