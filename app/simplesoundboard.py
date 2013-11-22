@@ -8,6 +8,8 @@ from flask.ext.admin import Admin, BaseView, expose
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.admin.contrib.sqla import ModelView
 from flask.ext.admin.contrib.fileadmin import FileAdmin
+from flask.ext.login import LoginManager
+from flask.ext.openid import OpenID
 
 SERVER_NAME='0.0.0.0'
 SERVER_PORT=5000
@@ -16,6 +18,10 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///soundboardtags.sqlite'
 app.config['SECRET_KEY'] = '123456790'
 db = SQLAlchemy(app)
+
+lm = LoginManager()
+lm.init_app(app)
+oid = OpenID(app, os.path.join(basedir,'tmp'))
 
 pygame.mixer.init()
 
@@ -48,6 +54,33 @@ class Sound(db.Model):
 				self.name = name
 	def __str__(self):
 		return self.name
+
+class User(db.Model):
+
+    id = db.Column(db.Integer, primary_key = True)
+    nickname = db.Column(db.String(64), unique = True)
+    email = db.Column(db.String(120), unique = True)
+    role = db.Column(db.SmallInteger, default = ROLE_USER)
+    #posts = db.relationship('Post', backref = 'author', lazy = 'dynamic')
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return unicode(self.id)
+
+    def __repr__(self):
+        return '<User %r>' % (self.nickname)
+
+@lm.user_loader
+def load_user(id):
+    return User.query.get(int(id))
 
 class SoundModelView(ModelView):
 	column_display_all_relations=True
