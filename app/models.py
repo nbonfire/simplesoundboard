@@ -61,12 +61,12 @@ class User(db.Model):
     themesong_id=db.ForeignKey('themesong.id')
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime)
-    followed = db.relationship('User', 
+    """followed = db.relationship('User', 
         secondary = followers, 
         primaryjoin = (followers.c.follower_id == id), 
         secondaryjoin = (followers.c.followed_id == id), 
         backref = db.backref('followers', lazy = 'dynamic'), 
-        lazy = 'dynamic')
+        lazy = 'dynamic')""" # leftovers from the mega tutorial, need to clean if I dont want to include.
 
     def avatar(self, size):
         return 'http://www.gravatar.com/avatar/' + md5(self.email).hexdigest() + '?d=identicon&r=x&s=' + str(size)
