@@ -1,8 +1,8 @@
+import os, re
 from app import db
 from hashlib import md5
 
-ROLE_USER = 0
-ROLE_ADMIN = 1
+
 
 sound_tags_table = db.Table('sound_tags', db.Model.metadata,
 						db.Column('sound_id', db.Integer, db.ForeignKey('sound.id')),
@@ -38,7 +38,8 @@ class ThemeSong(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	filename=db.Column(db.String(120))
 	name=db.Column(db.String(120))
-	users=db.relationship("User", backref=db.backref('themesong', lazy='dynamic')
+	users = db.relationship('User',backref='theme', lazy='dynamic')
+
 	def __init__(self, filename=None, name=None):
 		if filename==None:
 			print "filename is none for some reason. %s" % self
@@ -51,72 +52,80 @@ class ThemeSong(db.Model):
 				self.name = name
 	def __str__(self):
 		return self.name
+	@staticmethod
+	def random_themesong():
+		return ThemeSong.query.order_by(func.random()).offset(20).limit(1).first()
 
 class User(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    nickname = db.Column(db.String(64), unique = True)
-    email = db.Column(db.String(120), index = True, unique = True)
-    urole = db.Column(db.SmallInteger, default = ROLE_USER)
-    #posts = db.relationship('Post', backref = 'author', lazy = 'dynamic')
-    themesong_id=db.ForeignKey('themesong.id')
-    about_me = db.Column(db.String(140))
-    last_seen = db.Column(db.DateTime)
-    """followed = db.relationship('User', 
-        secondary = followers, 
-        primaryjoin = (followers.c.follower_id == id), 
-        secondaryjoin = (followers.c.followed_id == id), 
-        backref = db.backref('followers', lazy = 'dynamic'), 
-        lazy = 'dynamic')""" # leftovers from the mega tutorial, need to clean if I dont want to include.
+	id = db.Column(db.Integer, primary_key = True)
+	nickname = db.Column(db.String(64), unique = True)
+	email = db.Column(db.String(120), index = True, unique = True)
+	urole = db.Column(db.String(5))
+	#posts = db.relationship('Post', backref = 'author', lazy = 'dynamic')
+	themesong_id = db.Column(db.Integer,db.ForeignKey('theme_song.id'))
+	
+	
+	about_me = db.Column(db.String(140))
+	last_seen = db.Column(db.DateTime)
+	"""followed = db.relationship('User', 
+		secondary = followers, 
+		primaryjoin = (followers.c.follower_id == id), 
+		secondaryjoin = (followers.c.followed_id == id), 
+		backref = db.backref('followers', lazy = 'dynamic'), 
+		lazy = 'dynamic')""" # leftovers from the mega tutorial, need to clean if I dont want to include.
 
-    def avatar(self, size):
-        return 'http://www.gravatar.com/avatar/' + md5(self.email).hexdigest() + '?d=identicon&r=x&s=' + str(size)
+	def avatar(self, size):
+		return 'http://www.gravatar.com/avatar/' + md5(self.email).hexdigest() + '?d=identicon&r=x&s=' + str(size)
 
-    def is_authenticated(self):
-        return True
+	def is_authenticated(self):
+		return True
 
-    def is_admin(self):
-    	return bool(self.urole == "ADMIN")
+	def is_admin(self):
+		return bool(self.urole == "ADMIN")
 
-    def get_urole(self):
-        return self.urole
+	def get_urole(self):
+		return self.urole
 
-    def is_active(self):
-        return True
+	def is_active(self):
+		return True
 
-    def is_anonymous(self):
-        return False
+	def is_anonymous(self):
+		return False
+	def hastheme(self):
+		return (self.theme is not None)
+	def get_id(self):
+		return unicode(self.id)
+	def follow(self, user):
+		if not self.is_following(user):
+			self.followed.append(user)
+			return self
 
-    def get_id(self):
-        return unicode(self.id)
-    def follow(self, user):
-        if not self.is_following(user):
-            self.followed.append(user)
-            return self
+	def unfollow(self, user):
+		if self.is_following(user):
+			self.followed.remove(user)
+			return self
 
-    def unfollow(self, user):
-        if self.is_following(user):
-            self.followed.remove(user)
-            return self
+	def is_following(self, user):
+		return self.followed.filter(followers.c.followed_id == user.id).count() > 0
+	def followed_posts(self):
+		return Post.query.join(followers, (followers.c.followed_id == Post.user_id)).filter(followers.c.follower_id == self.id).order_by(Post.timestamp.desc())
 
-    def is_following(self, user):
-        return self.followed.filter(followers.c.followed_id == user.id).count() > 0
-    def followed_posts(self):
-        return Post.query.join(followers, (followers.c.followed_id == Post.user_id)).filter(followers.c.follower_id == self.id).order_by(Post.timestamp.desc())
+	@staticmethod
+	def make_unique_nickname(nickname):
+		if User.query.filter_by(nickname = nickname).first() == None:
+			return nickname
+		version = 2
+		while True:
+			new_nickname = nickname + str(version)
+			if User.query.filter_by(nickname = new_nickname).first() == None:
+				break
+			version += 1
+		return new_nickname
 
-    @staticmethod
-    def make_unique_nickname(nickname):
-        if User.query.filter_by(nickname = nickname).first() == None:
-            return nickname
-        version = 2
-        while True:
-            new_nickname = nickname + str(version)
-            if User.query.filter_by(nickname = new_nickname).first() == None:
-                break
-            version += 1
-        return new_nickname
+	def __repr__(self):
+		return '<User %r>' % (self.nickname)
 
-    def __repr__(self):
-        return '<User %r>' % (self.nickname)
+
 
 def stripfilename(filename):
 	basename=os.path.basename(filename)
@@ -125,11 +134,11 @@ def stripfilename(filename):
 	return separateCamelCase.replace("_"," ")
 
 def get_or_create(model, **kwargs):
-    instance = db.session.query(model).filter_by(**kwargs).first()
-    if instance:
-        return instance
-    else:
-        instance = model(**kwargs)
-        db.session.add(instance)
-        db.session.commit()
-        return instance
+	instance = db.session.query(model).filter_by(**kwargs).first()
+	if instance:
+		return instance
+	else:
+		instance = model(**kwargs)
+		db.session.add(instance)
+		db.session.commit()
+		return instance

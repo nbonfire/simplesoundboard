@@ -1,4 +1,115 @@
-{% extends 'admin/master.html' %}
-{% block body %}
-    Hello World from MyView!
+{% extends "base.html" %}
+{% block title %}Game Night Soundboard{% endblock %}
+{% block content %}
+
+  
+   
+   <!-- -->
+    <nav class="navbar navbar-default visible-xs visible-s" role="navigation">
+    	<div class="navbar-header">
+    	<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+    		<span class="sr-only">Toggle navigation</span>
+    		<span class="icon-bar"></span>
+    		<span class="icon-bar"></span>
+    		<span class="icon-bar"></span>
+    	</button>
+    	<a class="navbar-brand" href="#"><!--img src="/static/images/hitz.png"/-->HitzBoard</a>
+    	</div>
+    	<div class="collapse navbar-collapse navbar-ex1-collapse">
+    		<ul class="nav navbar-nav">
+    			{% for category in filenamesandcategories %}
+          {% if category['sounds']|length()>0 %}
+        		<li><a href="#{{ category['category']}}">{{ category['category']}}</a></li>
+      			{% endif %}
+            {% endfor %}
+      		</ul>
+      	</div>
+
+    </nav>
+	<div class="container">
+	<div class="row row-offcanvas row-offcanvas-right">
+        <div class="col-xs-12 col-sm-12 col-md-10">
+          <!--p class="pull-right visible-xs">
+            <button type="button" class="btn btn-primary btn-xs togglenav">Toggle nav</button>
+          </p-->
+	{% for filenames in filenamesandcategories %}
+  {% if filenames['sounds']|length()>0 %}
+		<section id='{{filenames['category']}}'><div class="row"><!--div class="col-xs-12 col-md-12 col-lg-12"--><h3>{{ filenames['category'] }}</h3><!--/div-->
+			{% for sound in filenames['sounds'] %}
+			<div class="col-xs-12 col-md-6 col-lg-6">
+
+				<button class="sound btn btn-primary btn-block" value="{{sound['file']}}" href="#">{{sound['name']}}</button>
+			</div>
+			{% endfor %}
+		</div>
+		</section>
+  {% endif %}
+	{% endfor %}
+	</div>
+<!-- -->
+<div class="col-xs-6 col-sm-4 col-md-2 sidebar-offcanvas togglenav" id="sidebar" role="navigation">
+          <div class="well sidebar-nav">
+            <ul class="nav">
+      {% for category in filenamesandcategories %}
+      {% if category['sounds']|length()>0 %}
+        <li><a href="#{{ category['category']}}">{{ category['category']}}</a></li>
+        {% endif %}
+      {% endfor %}
+      </ul>
+
+</div>
+  </div>
+</div>
+<!-- -->
+{% endblock %}
+{% block script %}
+	<script type="text/javascript">
+	(function($) {
+		
+  var IS_IOS = /iphone|ipad/i.test(navigator.userAgent);
+  $.fn.nodoubletapzoom = function() {
+    if (IS_IOS)
+      $(this).bind('touchstart', function preventZoom(e) {
+        var t2 = e.timeStamp
+          , t1 = $(this).data('lastTouch') || t2
+          , dt = t2 - t1
+          , fingers = e.originalEvent.touches.length;
+        $(this).data('lastTouch', t2);
+        if (!dt || dt > 500 || fingers > 1) return; // not double-tap
+
+        e.preventDefault(); // double tap - prevent the zoom
+        // also synthesize click events we just swallowed up
+        $(this).trigger('click').trigger('click');
+      });
+  };
+})(jQuery);
+		$(function(){
+			$('.togglenav').click(function() {
+    		$('.sidebar-offcanvas').toggleClass('active');
+    		console.log('does this click even work?');
+  		});
+			$('.sound').nodoubletapzoom();
+			$('.sound').click(function(){
+				var filepicked = $(this).val();
+				console.log(filepicked);
+				$.ajax({
+            		type: "GET",
+            		url: "/play/"+filepicked,
+            
+				});
+			});
+
+			
+			
+		})
+
+	</script>
+	<style type="text/css">
+		.well.sidebar-nav {
+			position: fixed;
+			padding-left: 0px;
+			padding-right: 0px;
+		}
+
+	</style>
 {% endblock %}

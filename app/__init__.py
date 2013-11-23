@@ -1,6 +1,6 @@
 from flask import Flask 
 from flask.ext.sqlalchemy import SQLAlchemy 
-import os
+import os, glob
 from flask.ext.login import LoginManager
 from flask.ext.openid import OpenID
 from flask.ext.admin import Admin
@@ -52,10 +52,11 @@ soundfilenames.extend(glob.glob('sounds/*.mp3'))
 
 
 for filename in soundfilenames:
-	afile=get_or_create(Sound, filename=filename)
+	afile=models.get_or_create(models.Sound, filename=filename)
 
 themefilenames = glob.glob('themes/*.wav')
 themefilenames.extend(glob.glob('themes/*.mp3'))
 
 for filename in themefilenames:
-	afile=get_or_create(ThemeSong, filename=filename)
+	afile=models.get_or_create(models.ThemeSong, filename=filename)
+print "* Ready"
