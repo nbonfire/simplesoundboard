@@ -16,5 +16,7 @@ virtualenv flask
 4) init the DB
 
 dbcontrol.py db init
+
 dbcontrol.py db migrate
+
 dbcontrol.py db upgrade
