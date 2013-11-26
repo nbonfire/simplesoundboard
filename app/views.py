@@ -10,22 +10,42 @@ from models import *
 from datetime import datetime
 from decorators import async
 from config import basedir
+from wtforms.fields import SelectField
+from Queue import Queue
 
 pygame.mixer.init()
 fxchannel=pygame.mixer.Channel(1)
-SONG_END = pygame.USEREVENT + 1
-pygame.mixer.music.set_endevent(SONG_END)
-pygame.init()
+clock = pygame.time.Clock()
+
+_theme_queue=Queue()
+@async
+def entrance_queue(theme):
+	global _theme_queue
+	controller=False
+	if _theme_queue.empty():
+		controller=True
+	_theme_queue.put(theme)
+	print "added %s to queue" % theme
+	if controller:
+		while pygame.mixer.music.get_busy():
+			clock.tick(10)
+		if _theme_queue.empty()==False and pygame.mixer.music.get_busy() ==False:
+			pygame.mixer.music.load(_theme_queue.get().filename)
+			_theme_queue.task_done()
+		while _theme_queue.empty()==False:
+			pygame.mixer.music.queue(_theme_queue.get().filename)
+			_theme_queue.task_done()
+		#somehow turn xbmc music down
+		pygame.mixer.music.play()
+
+				
+"""
+resume_volume() # somehow set the xbmc volume back up
+
 @async
 def resume_volume():
-	"""while True:
-
-		for event in pygame.event.get():
-			if event.type == SONG_END and not pygame.mixer.music.get_busy():
-				print "the song ended, resume xbmc volume"
-				"""
-
-resume_volume() # somehow set the xbmc volume back up
+	#probably using pygame.music.set_endevent
+"""
 
 
 
@@ -89,11 +109,9 @@ def after_login(resp):
 	if 'remember_me' in session:
 		remember_me = session['remember_me']
 		session.pop('remember_me', None)
-	if pygame.mixer.music.get_busy() and user.hastheme():
-		pygame.mixer.music.queue(user.theme.filename)
-	elif user.hastheme():
-		pygame.mixer.music.load(user.theme.filename)
-		pygame.mixer.music.play()
+	
+	if user.hastheme():
+		entrance_queue(user.theme)
 	login_user(user, remember = remember_me)
 	return redirect(request.args.get('next') or url_for('index'))
 
@@ -142,12 +160,12 @@ class SoundModelView(ModelView):
 	column_display_all_relations=True
 	column_list = ('name', 'tags')
 	form_excluded_columns = ('name')
-	"""
+	
 	def is_accessible(self):
-		if g.user is not None and g.user.is_admin():
+		if g.user.is_authenticated() and g.user.is_admin():
 			return True
 		else:
-			return False"""
+			return False
 	def on_model_change(self, form, model, is_created):
 		
 
@@ -155,32 +173,57 @@ class SoundModelView(ModelView):
 			model.name=stripfilename(model.filename)
 		self.session.add(model)
 
+class ThemeSongModelView(ModelView):
+	#column_display_all_relations=True
+	column_list = ('name', 'users')
+	form_excluded_columns = ('name')
+	def is_accessible(self):
+		if g.user.is_authenticated() and g.user.is_admin():
+			return True
+		else:
+			return False
+	def on_model_change(self, form, model, is_created):
+		
 
+		if is_created==True:
+			model.name=stripfilename(model.filename)
+		self.session.add(model)
 
 class SoundFileAdmin(FileAdmin):
 	allowed_extensions=('wav', 'mp3', 'ogg')
-	"""def is_accessible(self):
-		if g.user is not None and g.user.is_admin():
+	def is_accessible(self):
+		if g.user.is_authenticated() and g.user.is_admin():
 			return True
 		else:
-			return False"""
+			return False
 	def on_file_upload(self, directory, path, filename):
 		db.session.add(Sound(filename=filename))
 		db.session.commit()
 
 class ThemeSongFileAdmin(FileAdmin):
 	allowed_extensions=('wav', 'mp3', 'ogg')
-	"""def is_accessible(self):
-		if g.user is not None and g.user.is_admin():
+	def is_accessible(self):
+		if g.user.is_authenticated() and g.user.is_admin():
 			return True
 		else:
-			return False"""
+			return False
 	def on_file_upload(self, directory, path, filename):
 		db.session.add(ThemeSong(filename=filename))
 		db.session.commit()
-
+class UserModelView(ModelView):
+	can_create=False
+	form_overrides = dict(status=SelectField)
+	form_args = dict(
+		urole=dict(
+			choices=[(0,"USER"), (1,"admin")]))
+	def is_accessible(self):
+		if g.user.is_authenticated() and g.user.is_admin():
+			return True
+		else:
+			return False
 admin.add_view(SoundModelView(Sound, db.session))
+admin.add_view(ThemeSongModelView(ThemeSong, db.session, name="Theme Songs"))
 admin.add_view(ModelView(Tag, db.session))
-admin.add_view(ModelView(User, db.session))
-admin.add_view(SoundFileAdmin(os.path.join(basedir, 'sounds'), '/sounds/', name = 'Sound Files'))
-admin.add_view(ThemeSongFileAdmin(os.path.join(basedir, 'themes'), '/themes/', name = 'Theme Songs'))
+admin.add_view(UserModelView(User, db.session))
+admin.add_view(SoundFileAdmin(os.path.join(basedir, 'sounds'), '/sounds/', name = 'Upload Sounds'))
+admin.add_view(ThemeSongFileAdmin(os.path.join(basedir, 'themes'), '/themes/', name = 'Upload Theme Songs'))

@@ -73,7 +73,8 @@ class User(db.Model):
 		secondaryjoin = (followers.c.followed_id == id), 
 		backref = db.backref('followers', lazy = 'dynamic'), 
 		lazy = 'dynamic')""" # leftovers from the mega tutorial, need to clean if I dont want to include.
-
+	def __str__(self):
+		return self.nickname
 	def avatar(self, size):
 		return 'http://www.gravatar.com/avatar/' + md5(self.email).hexdigest() + '?d=identicon&r=x&s=' + str(size)
 
