@@ -75,6 +75,14 @@ def play(name):
 	#pygame.mixer.music.play()
 	##sounds[name].play()
 	return "ok"
+	
+@app.route("/play/tag/<tagname>")
+def playtag(tagname):
+	if not pygame.mixer.get_init():
+		pygame.mixer.init();
+	tag = get_or_create(db.Tag, tagname);
+	fxchannel.play(tag.random())
+	return "ok"
 
 @app.route('/login', methods = ['GET', 'POST'])
 @oid.loginhandler
