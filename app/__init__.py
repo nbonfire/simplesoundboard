@@ -45,7 +45,7 @@ admin = Admin(app, name='HitzBoard Admin')
 from app import views, models
 
 
-
+"""
 soundfilenames = glob.glob('sounds/*.wav')
 soundfilenames.extend(glob.glob('sounds/*.mp3'))
 #print filenames
@@ -60,3 +60,4 @@ themefilenames.extend(glob.glob('themes/*.mp3'))
 for filename in themefilenames:
 	afile=models.get_or_create(models.ThemeSong, filename=filename)
 print "* Ready"
+"""
