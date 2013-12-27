@@ -63,7 +63,39 @@ def before_request():
 def index():
 	tagsandsounds=[{'category':x, 'sounds':[{'file': y.filename, 'name':y.name} for y in x.sounds]} for x in db.session.query(Tag).all() ]
 	return render_template('soundboard.html', filenamesandcategories=tagsandsounds, jqueryurl=url_for('static', filename='js/jquery.min.js'))
-	
+
+@app.route('/load')
+@login_required
+def loadsounds():
+	soundfilenames = glob.glob('sounds/*/*.wav')
+	soundfilenames.extend(glob.glob('sounds/*/*.mp3'))
+	for f in soundfilenames:
+		newname='sounds/%s'%os.path.basename(f)
+		tagname=os.path.relpath(os.path.dirname(f))
+		tag=get_or_create(models.Tag, name=tagname)
+		os.rename(f,newname)
+		asound=models.get_or_create(models.Sound, filename=newname)
+		if tag not in asound.tags:
+			asound.tags.append(tag)
+			db.session.commit()
+
+	soundfilenames = glob.glob('sounds/*.wav')
+	soundfilenames.extend(glob.glob('sounds/*.mp3'))
+	#print filenames
+
+
+	for filename in soundfilenames:
+		afile=models.get_or_create(models.Sound, filename=filename)
+	soundfilenames = glob.glob('sounds/*/*.wav')
+	soundfilenames.extend(glob.glob('sounds/*/*.mp3'))
+
+	themefilenames = glob.glob('themes/*.wav')
+	themefilenames.extend(glob.glob('themes/*.mp3'))
+
+	for filename in themefilenames:
+		afile=models.get_or_create(models.ThemeSong, filename=filename)
+	print "* Ready"
+
 @app.route("/play/sounds/<name>")
 def play(name):
 	name=os.path.join('sounds', name)

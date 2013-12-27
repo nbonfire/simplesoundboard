@@ -13,6 +13,8 @@ class Tag(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.Unicode(64))
 
+	def __init__(self, name):
+		self.name = name
 	def __str__(self):
 		return self.name
 	def randomsound(self):
