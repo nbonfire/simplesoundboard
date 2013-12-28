@@ -1,3 +1,4 @@
 #!flask/bin/python
 from app import app
-app.run(debug = True)
+from config import SERVER_NAME, SERVER_PORT
+app.run(SERVER_NAME, SERVER_PORT, debug = True)

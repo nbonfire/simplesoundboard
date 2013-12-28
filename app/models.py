@@ -15,9 +15,9 @@ class Tag(db.Model):
 	name = db.Column(db.Unicode(64))
 
 	def __init__(self, name):
-		self.name = name
+		self.name=name
 	def __str__(self):
-		return self.name
+		return stripfilename(self.name)
 	def randomsound(self):
 		if len(self.sounds)>0:
 			return Sound.query.join(self).order_by(func.random()).first()
