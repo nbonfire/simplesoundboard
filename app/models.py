@@ -1,7 +1,8 @@
 import os, re
 from app import db
 from hashlib import md5
-
+from  sqlalchemy.sql.expression import func
+from config import ADMINS
 
 
 sound_tags_table = db.Table('sound_tags', db.Model.metadata,
@@ -89,7 +90,11 @@ class User(db.Model):
 		return True
 
 	def is_admin(self):
-		return bool(self.urole == "ADMIN")
+		if self.email in ADMINS:
+			return True
+		else:
+			return False
+		#return bool(self.urole == "ADMIN")
 
 	def get_urole(self):
 		return self.urole

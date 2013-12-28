@@ -12,6 +12,7 @@ from decorators import async
 from config import basedir
 from wtforms.fields import SelectField
 from Queue import Queue
+import glob
 
 pygame.mixer.init()
 fxchannel=pygame.mixer.Channel(1)
@@ -67,34 +68,36 @@ def index():
 @app.route('/load')
 @login_required
 def loadsounds():
-	soundfilenames = glob.glob('sounds/*/*.wav')
-	soundfilenames.extend(glob.glob('sounds/*/*.mp3'))
-	for f in soundfilenames:
-		newname='sounds/%s'%os.path.basename(f)
-		tagname=os.path.relpath(os.path.dirname(f))
-		tag=get_or_create(models.Tag, name=tagname)
-		os.rename(f,newname)
-		asound=models.get_or_create(models.Sound, filename=newname)
-		if tag not in asound.tags:
-			asound.tags.append(tag)
-			db.session.commit()
+
 
 	soundfilenames = glob.glob('sounds/*.wav')
 	soundfilenames.extend(glob.glob('sounds/*.mp3'))
-	#print filenames
+	print "sounds/*.wav+mp3: %s"% str(soundfilenames)
 
 
 	for filename in soundfilenames:
-		afile=models.get_or_create(models.Sound, filename=filename)
-	soundfilenames = glob.glob('sounds/*/*.wav')
-	soundfilenames.extend(glob.glob('sounds/*/*.mp3'))
+		afile=get_or_create(Sound, filename=filename)
 
 	themefilenames = glob.glob('themes/*.wav')
 	themefilenames.extend(glob.glob('themes/*.mp3'))
 
 	for filename in themefilenames:
-		afile=models.get_or_create(models.ThemeSong, filename=filename)
-	print "* Ready"
+		afile=get_or_create(ThemeSong, filename=filename)
+
+	soundfilenames = glob.glob('sounds/*/*.wav')
+	soundfilenames.extend(glob.glob('sounds/*/*.mp3'))
+
+	for f in soundfilenames:
+		newname=os.path.join('sounds',os.path.basename(f))
+		print newname
+		tagname=os.path.relpath(os.path.dirname(f),'sounds')
+		tag=get_or_create(Tag, name=tagname)
+		os.rename(f,newname)
+		asound=get_or_create(Sound, filename=newname)
+		if tag not in asound.tags:
+			asound.tags.append(tag)
+			db.session.commit()
+	return "ok"
 
 @app.route("/play/sounds/<name>")
 def play(name):
