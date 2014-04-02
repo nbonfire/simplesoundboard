@@ -62,7 +62,7 @@ def before_request():
 @app.route("/index")
 @login_required
 def index():
-	tagsandsounds=[{'category':x, 'sounds':[{'file': y.filename, 'name':y.name} for y in x.sounds]} for x in db.session.query(Tag).all() ]
+	tagsandsounds=[{'category':x, 'sounds':[{'file': y.filename, 'name':y.name} for y in sorted(x.sounds,key=lambda x:x.name)]} for x in db.session.query(Tag).all().order_by(Tag.name) ]
 	return render_template('soundboard.html', filenamesandcategories=tagsandsounds, jqueryurl=url_for('static', filename='js/jquery.min.js'))
 
 @app.route('/load')
