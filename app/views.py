@@ -116,8 +116,9 @@ def play(name):
 def playtag(tagname):
 	if not pygame.mixer.get_init():
 		pygame.mixer.init();
-	tag = get_or_create(db.Tag, tagname);
-	fxchannel.play(tag.random())
+	tag = get_or_create(Tag, name=tagname);
+
+	fxchannel.play(pygame.mixer.Sound(tag.randomsound().filename))
 	return "ok"
 
 @app.route('/login', methods = ['GET', 'POST'])
