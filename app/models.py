@@ -18,10 +18,10 @@ class Tag(db.Model):
 	def __str__(self):
 		return stripfilename(self.name)
 	def randomsound(self):
-		if len(self.sounds)>0:
-			return Sound.query.join(self).order_by(func.random()).first()
-		else:
-			return Sound.query.first()
+		
+		return self.sounds.order_by(func.random()).first()
+		
+		
 
 class Sound(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
