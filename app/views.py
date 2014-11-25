@@ -17,6 +17,9 @@ import glob
 pygame.mixer.init()
 fxchannel=pygame.mixer.Channel(1)
 clock = pygame.time.Clock()
+lasttag = ''
+lasttagtime = datetime.utcnow()
+lasttagfilename=''
 
 _theme_queue=Queue()
 @async
@@ -114,12 +117,22 @@ def play(name):
 	
 @app.route("/play/tag/<tagname>")
 def playtag(tagname):
+	global lasttag
+	global lasttagfilename
+	global lasttagtime
 	if not pygame.mixer.get_init():
 		pygame.mixer.init();
-	 
-	tag = get_or_create(Tag, name=tagname);
-	filetoplay=tag.randomsound().filename
-	print filetoplay
+	if (tagname != lasttag) or  (datetime.utcnow() > (lasttagtime + datetime.timedelta(seconds=1))):
+		tag = get_or_create(Tag, name=tagname);
+		filetoplay=tag.randomsound().filename
+		lasttag = tagname
+		lasttagfilename = filetoplay
+		lasttagtime = datetime.utcnow()
+	else:
+		filetoplay = lasttagfilename
+
+	#print filetoplay
+
 	fxchannel.play(pygame.mixer.Sound(filetoplay))
 	return filetoplay
 
