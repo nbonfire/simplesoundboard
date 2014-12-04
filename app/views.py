@@ -301,23 +301,25 @@ PADMAP = chromatic
 
 # Eventually I'll implement a "favorites" in the model to replace this. For now, hardcoded favorite tags to use on the mpd.
 
-TAGMAP = ['Jock Jams',
-          'Big Save',
-          'Blowout',
-          'Close Game',
-          'Comeback',
-          'Fire Extinguished',
-          'Fuckup',
-          'Game Over',
-          'Nice Goal',
-          'On Fire',
-          'One-Timer',
-          'Waiting',
-          'Windowshopping',
-          'Wrongful Goal',
+TAGMAP = ['*Waiting',
+          '*Jewish',
+          'Seinfeld',
+          'random',
+          '*Comeback',
+          '*Blowout',
+          '*CloseGame',
+          '*GameOver',
+          '*Windowshopping',
+          '*Fuckup',
+          '*BigSave',
+          '*FireExtinguished',
+          '*NiceGoal',
+          '*JockJams',
+          '*OneTimer',
+          '*OnFire',
           ]
 
-DEFAULT = 'Jock Jams'
+DEFAULT = 'random'
 
 import sys
 import os
