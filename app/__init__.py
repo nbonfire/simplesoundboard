@@ -44,6 +44,8 @@ admin = Admin(app, name='HitzBoard Admin')
 
 from app import views, models
 
+views.input_main()
+
 
 """
 soundfilenames = glob.glob('sounds/*.wav')
