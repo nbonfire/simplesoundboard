@@ -330,14 +330,11 @@ from pygame.locals import *
 
 @async
 def input_main(device_id = None):
-	if not pygame.get_init():
-		pygame.init()
-	if not pygame.fastevent.get_init():
-		pygame.fastevent.init()
+	pygame.init()
+	pygame.fastevent.init()
 	event_get = pygame.fastevent.get
 	event_post = pygame.fastevent.post
-	if not pygame.midi.get_init():
-		pygame.midi.init()
+	pygame.midi.init()
 
 	#_print_device_info()
 
