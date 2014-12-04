@@ -17,9 +17,7 @@ import glob
 pygame.mixer.init()
 fxchannel=pygame.mixer.Channel(1)
 clock = pygame.time.Clock()
-lasttag = ''
-lasttagtime = datetime.utcnow()
-lasttagfilename=''
+
 
 _theme_queue=Queue()
 @async
@@ -117,9 +115,7 @@ def play(name):
 	
 @app.route("/play/tag/<tagname>")
 def playtag(tagname):
-	global lasttag
-	global lasttagfilename
-	global lasttagtime
+	
 	if not pygame.mixer.get_init():
 		pygame.mixer.init();
 	
@@ -129,9 +125,9 @@ def playtag(tagname):
 		else:
 			tag = get_or_create(Tag, name=tagname);
 		filetoplay=tag.randomsound().filename
-		lasttag = tagname
-		lasttagfilename = filetoplay
-		lasttagtime = datetime.utcnow()
+		playtag.lasttag = tagname
+		playtag.lasttagfilename = filetoplay
+		playtag.lasttagtime = datetime.utcnow()
 	else:
 		filetoplay = lasttagfilename
 
@@ -139,6 +135,9 @@ def playtag(tagname):
 
 	fxchannel.play(pygame.mixer.Sound(filetoplay))
 	return filetoplay
+playtag.lasttag=''
+playtag.lasttagfilename=''
+playtag.lasttagtime=datetime.utcnow()
 
 @app.route('/login', methods = ['GET', 'POST'])
 @oid.loginhandler
@@ -291,3 +290,104 @@ admin.add_view(ModelView(Tag, db.session))
 admin.add_view(UserModelView(User, db.session))
 admin.add_view(SoundFileAdmin(os.path.join(basedir, 'sounds'), '/sounds/', name = 'Upload Sounds'))
 admin.add_view(ThemeSongFileAdmin(os.path.join(basedir, 'themes'), '/themes/', name = 'Upload Theme Songs'))
+
+#
+#  Midi control pad stuff goes here:
+#
+
+chromatic = range(36,81) # Values for the "Chromatic" preset, 36 through 80
+
+PADMAP = chromatic
+
+# Eventually I'll implement a "favorites" in the model to replace this. For now, hardcoded favorite tags to use on the mpd.
+
+TAGMAP = ['Jock Jams',
+          'Big Save',
+          'Blowout',
+          'Close Game',
+          'Comeback',
+          'Fire Extinguished',
+          'Fuckup',
+          'Game Over',
+          'Nice Goal',
+          'On Fire',
+          'One-Timer',
+          'Waiting',
+          'Windowshopping',
+          'Wrongful Goal',
+          ]
+
+DEFAULT = 'Jock Jams'
+
+import sys
+import os
+
+import pygame
+import pygame.midi
+from pygame.locals import *
+
+@async
+def input_main(device_id = None):
+	if not pygame.get_init():
+		pygame.init()
+	if not pygame.fastevent.get_init():
+		pygame.fastevent.init()
+	event_get = pygame.fastevent.get
+	event_post = pygame.fastevent.post
+	if not pygame.midi.get_init():
+		pygame.midi.init()
+
+	#_print_device_info()
+
+
+	if device_id is None:
+		input_id = pygame.midi.get_default_input_id()
+	else:
+		input_id = device_id
+
+	print ("using midi input_id :%s:" % input_id)
+	i = pygame.midi.Input( input_id )
+
+	#pygame.display.set_mode((1,1))
+
+
+
+	going = True
+	while going:
+		events = event_get()
+		for e in events:
+			if e.type in [QUIT]:
+				going = False
+			if e.type in [KEYDOWN]:
+				going = False
+			if e.type in [pygame.midi.MIDIIN]:
+				#
+				# THIS IS WHERE ALL THE GOOD SHIT GOES
+				#
+				if e.dict['status']==144: #144 is key down
+					print 'key '+str(e.dict['data1'])+' pressed'
+					try:
+						tagToPlay = TAGMAP[PADMAP.index(e.dict['data1'])]
+						print 'play tag ' + tagToPlay
+					except Exception, error:
+						#raise e
+						print error
+						print 'no tag defined for that key, lets play a Jock Jam instead'
+						tagToPlay = DEFAULT
+					#urlToFetch='http://'+SERVER+URLROOT+'/play/tag/'+urllib.quote(tagToPlay)
+					#print urlToFetch
+					#response=urllib.urlopen(urlToFetch)
+					response=playtag(tagToPlay)
+					
+
+		if i.poll():
+			midi_events = i.read(10)
+			
+			# convert them into pygame events.
+			midi_evs = pygame.midi.midis2events(midi_events, i.device_id)
+
+			for m_e in midi_evs:
+				event_post( m_e )
+
+	del i
+	pygame.midi.quit()
