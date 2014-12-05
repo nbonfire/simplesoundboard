@@ -7,7 +7,7 @@ from flask.ext.admin.contrib.fileadmin import FileAdmin
 from app import app, db, lm, oid, admin
 from forms import LoginForm, EditForm
 from models import *
-from datetime import datetime
+from datetime import datetime, timedelta
 from decorators import async
 from config import basedir
 from wtforms.fields import SelectField
@@ -119,7 +119,7 @@ def playtag(tagname):
 	if not pygame.mixer.get_init():
 		pygame.mixer.init();
 	
-	if (tagname != playtag.lasttag) or  (datetime.utcnow() > (playtag.lasttagtime + datetime.timedelta(seconds=1))):
+	if (tagname != playtag.lasttag) or  (datetime.utcnow() > (playtag.lasttagtime + timedelta(seconds=1))):
 		if tagname == 'random':
 			tag = Tag.query.order_by(func.random()).first()
 		else:
