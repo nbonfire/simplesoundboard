@@ -115,7 +115,7 @@ def play(name):
 	
 @app.route("/play/tag/<tagname>")
 def playtag(tagname):
-	
+	'''
 	if not pygame.mixer.get_init():
 		pygame.mixer.init();
 	
@@ -136,9 +136,45 @@ def playtag(tagname):
 
 	fxchannel.play(pygame.mixer.Sound(filetoplay))
 	return filetoplay
-playtag.lasttag=''
-playtag.lasttagfilename=''
-playtag.lasttagtime=datetime.utcnow()
+	'''
+	if g.user is not None and g.user.is_authenticated():
+		source = g.user.nickname
+	else:
+		source = 'anonymous'
+	return playtagunwrapped(tagname,source)
+
+
+playtagunwrapped(tagname,source):
+		
+	if not pygame.mixer.get_init():
+		pygame.mixer.init();
+	
+	if source in playtagunwrapped.sources:
+		if (tagname != playtagunwrapped.lasttag[source]) or  (datetime.utcnow() > (playtagunwrapped.lasttagtime[source] + timedelta(seconds=3))):
+			if tagname == 'random':
+				tag = Tag.query.order_by(func.random()).first()
+			else:
+				tag = get_or_create(Tag, name=tagname);
+			filetoplay=tag.randomsound().filename
+			playtagunwrapped.lasttag[source] = tagname
+			playtag.lasttagfilename[source] = filetoplay
+			playtag.lasttagtime[source] = datetime.utcnow()
+		else:
+			filetoplay = playtag.lasttagfilename[source]
+			playtag.lasttagtime[source] = datetime.utcnow()
+	else:
+		playtagunwrapped.sources.append(source)
+		playtagunwrapped.lasttag[source]=tagname
+		playtagunwrapped.lasttagfilename[source]=filetoplay
+		playtagunwrapped.lasttagtime[source]=datetime.utcnow()
+	#print filetoplay
+
+	fxchannel.play(pygame.mixer.Sound(filetoplay))
+	return filetoplay
+playtagunwrapped.sources=[]
+playtagunwrapped.lasttag={}
+playtagunwrapped.lasttagfilename={}
+playtagunwrapped.lasttagtime={}
 
 @app.route('/login', methods = ['GET', 'POST'])
 @oid.loginhandler
@@ -377,7 +413,7 @@ def input_main(device_id = None):
 					#urlToFetch='http://'+SERVER+URLROOT+'/play/tag/'+urllib.quote(tagToPlay)
 					#print urlToFetch
 					#response=urllib.urlopen(urlToFetch)
-					response=playtag(tagToPlay)
+					response=playtagunwrapped(tagToPlay,source='midi')
 					
 
 		if i.poll():
