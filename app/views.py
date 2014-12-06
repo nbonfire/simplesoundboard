@@ -157,11 +157,11 @@ def playtagunwrapped(tagname,source):
 				tag = get_or_create(Tag, name=tagname);
 			filetoplay=tag.randomsound().filename
 			playtagunwrapped.lasttag[source] = tagname
-			playtag.lasttagfilename[source] = filetoplay
-			playtag.lasttagtime[source] = datetime.utcnow()
+			playtagunwrapped.lasttagfilename[source] = filetoplay
+			playtagunwrapped.lasttagtime[source] = datetime.utcnow()
 		else:
-			filetoplay = playtag.lasttagfilename[source]
-			playtag.lasttagtime[source] = datetime.utcnow()
+			filetoplay = playtagunwrapped.lasttagfilename[source]
+			playtagunwrapped.lasttagtime[source] = datetime.utcnow()
 	else:
 		filetoplay=tag.randomsound().filename
 		playtagunwrapped.sources.append(source)
