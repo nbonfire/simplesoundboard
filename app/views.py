@@ -163,6 +163,10 @@ def playtagunwrapped(tagname,source):
 			filetoplay = playtagunwrapped.lasttagfilename[source]
 			playtagunwrapped.lasttagtime[source] = datetime.utcnow()
 	else:
+		if tagname == 'random':
+			tag = Tag.query.order_by(func.random()).first()
+		else:
+			tag = get_or_create(Tag, name=tagname);
 		filetoplay=tag.randomsound().filename
 		playtagunwrapped.sources.append(source)
 		playtagunwrapped.lasttag[source]=tagname
