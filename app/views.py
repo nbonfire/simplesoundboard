@@ -119,7 +119,7 @@ def playtag(tagname):
 	if not pygame.mixer.get_init():
 		pygame.mixer.init();
 	
-	if (tagname != playtag.lasttag) or  (datetime.utcnow() > (playtag.lasttagtime + timedelta(seconds=1))):
+	if (tagname != playtag.lasttag) or  (datetime.utcnow() > (playtag.lasttagtime + timedelta(seconds=3))):
 		if tagname == 'random':
 			tag = Tag.query.order_by(func.random()).first()
 		else:
@@ -129,7 +129,8 @@ def playtag(tagname):
 		playtag.lasttagfilename = filetoplay
 		playtag.lasttagtime = datetime.utcnow()
 	else:
-		filetoplay = lasttagfilename
+		filetoplay = playtag.lasttagfilename
+		playtag.lasttagtime = datetime.utcnow()
 
 	#print filetoplay
 
