@@ -163,6 +163,7 @@ def playtagunwrapped(tagname,source):
 			filetoplay = playtag.lasttagfilename[source]
 			playtag.lasttagtime[source] = datetime.utcnow()
 	else:
+		filetoplay=tag.randomsound().filename
 		playtagunwrapped.sources.append(source)
 		playtagunwrapped.lasttag[source]=tagname
 		playtagunwrapped.lasttagfilename[source]=filetoplay
