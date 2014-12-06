@@ -144,7 +144,7 @@ def playtag(tagname):
 	return playtagunwrapped(tagname,source)
 
 
-playtagunwrapped(tagname,source):
+def playtagunwrapped(tagname,source):
 		
 	if not pygame.mixer.get_init():
 		pygame.mixer.init();
