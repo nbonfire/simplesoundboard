@@ -103,6 +103,7 @@ def loadsounds():
 
 @app.route("/play/sounds/<name>")
 def play(name):
+	global fxchannel
 	name=os.path.join('sounds', name)
 	#print name
 	if not pygame.mixer.get_init():
@@ -145,7 +146,7 @@ def playtag(tagname):
 
 
 def playtagunwrapped(tagname,source):
-		
+	global fxchannel	
 	if not pygame.mixer.get_init():
 		pygame.mixer.init();
 	
