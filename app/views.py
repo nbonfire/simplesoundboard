@@ -406,6 +406,10 @@ def input_main(device_id = None):
 				#
 				# THIS IS WHERE ALL THE GOOD SHIT GOES
 				#
+				if e.dict['status']==176: #176 is the volume slider
+					print 'volume adjust: '+str(e.dict['data2'])
+					# lowest value 0, highest 127
+						
 				if e.dict['status']==144: #144 is key down
 					print 'key '+str(e.dict['data1'])+' pressed'
 					try:
