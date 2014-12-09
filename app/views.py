@@ -410,7 +410,9 @@ def input_main(device_id = None):
 					print 'volume adjust: '+str(e.dict['data2'])
 					# lowest value 0, highest 127, stored in e.dict['data2']
 					# TODO: add xbmc json-rpc clal to set volume based on this
-						
+					# For now, use nircmd and a system() call 
+					volumeLevel=e.dict['data2']/127.0
+					returnval=os.system('NirCmd.exe setappvolume xbmc.exe ' + str(volumeLevel))
 				if e.dict['status']==144: #144 is key down
 					print 'key '+str(e.dict['data1'])+' pressed'
 					try:
