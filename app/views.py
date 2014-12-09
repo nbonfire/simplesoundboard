@@ -408,7 +408,8 @@ def input_main(device_id = None):
 				#
 				if e.dict['status']==176: #176 is the volume slider
 					print 'volume adjust: '+str(e.dict['data2'])
-					# lowest value 0, highest 127
+					# lowest value 0, highest 127, stored in e.dict['data2']
+					# TODO: add xbmc json-rpc clal to set volume based on this
 						
 				if e.dict['status']==144: #144 is key down
 					print 'key '+str(e.dict['data1'])+' pressed'
