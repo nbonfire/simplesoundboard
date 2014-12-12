@@ -18,7 +18,24 @@ pygame.mixer.init()
 fxchannel=pygame.mixer.Channel(1)
 clock = pygame.time.Clock()
 
-
+TAGMAP = ['*Waiting',
+          '*Jewish',
+          'Seinfeld',
+          'random',
+          '*Comeback',
+          '*Blowout',
+          '*CloseGame',
+          '*GameOver',
+          '*Windowshopping',
+          '*Fuckup',
+          '*BigSave',
+          '*FireExtinguished',
+          '*NiceGoal',
+          '*JockJams',
+          '*OneTimer',
+          '*OnFire',
+          ]
+          
 _theme_queue=Queue()
 @async
 def entrance_queue(theme):
@@ -346,23 +363,7 @@ PADMAP = chromatic
 
 # Eventually I'll implement a "favorites" in the model to replace this. For now, hardcoded favorite tags to use on the mpd.
 
-TAGMAP = ['*Waiting',
-          '*Jewish',
-          'Seinfeld',
-          'random',
-          '*Comeback',
-          '*Blowout',
-          '*CloseGame',
-          '*GameOver',
-          '*Windowshopping',
-          '*Fuckup',
-          '*BigSave',
-          '*FireExtinguished',
-          '*NiceGoal',
-          '*JockJams',
-          '*OneTimer',
-          '*OnFire',
-          ]
+
 
 DEFAULT = 'random'
 
