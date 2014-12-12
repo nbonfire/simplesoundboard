@@ -32,6 +32,15 @@
           <!--p class="pull-right visible-xs">
             <button type="button" class="btn btn-primary btn-xs togglenav">Toggle nav</button>
           </p-->
+    <section id='favorites'><div class="row"><!--div class="col-xs-12 col-md-12 col-lg-12"--><h3>Favorites</h3><!--/div-->
+      {% for tag in tags %}
+      <div class="col-xs-12 col-md-6 col-lg-6">
+
+        <button class="tag btn btn-primary btn-block" value="{{tag}}" href="#">{{tag}}</button>
+      </div>
+      {% endfor %}
+    </div>
+    </section>
 	{% for filenames in filenamesandcategories %}
   {% if filenames['sounds']|length()>0 %}
 		<section id='{{filenames['category']}}'><div class="row"><!--div class="col-xs-12 col-md-12 col-lg-12"--><h3>{{ filenames['category'] }}</h3><!--/div-->
@@ -98,7 +107,16 @@
             
 				});
 			});
-
+      $('.tag').nodoubletapzoom();
+      $('.tag').click(function(){
+        var tagpicked = $(this).val();
+        console.log(tagpicked);
+        $.ajax({
+                type: "GET",
+                url: "/play/tag/"+tagpicked,
+            
+        });
+      });
 			
 			
 		})

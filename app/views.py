@@ -62,11 +62,13 @@ def before_request():
 @app.route("/")
 @app.route("/index")
 def index():
+	global TAGMAP
+	tags = [item for sublist in list(reversed(zip(*[iter(TAGMAP)]*4))) for item in sublist]
 	tagsandsounds=[{'category':x, 
 		'sounds':[
 			{'file': y.filename, 'name':y.name} for y in sorted(x.sounds,key=lambda x:x.name)]
 		} for x in db.session.query(Tag).order_by(Tag.name).all() ]
-	return render_template('soundboard.html', filenamesandcategories=tagsandsounds, jqueryurl=url_for('static', filename='js/jquery.min.js'))
+	return render_template('soundboard.html', tags=tags, filenamesandcategories=tagsandsounds, jqueryurl=url_for('static', filename='js/jquery.min.js'))
 
 @app.route('/load')
 def loadsounds():
