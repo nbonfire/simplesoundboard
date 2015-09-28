@@ -19,7 +19,7 @@ fxchannel=pygame.mixer.Channel(1)
 clock = pygame.time.Clock()
 
 TAGMAP = ['*Waiting',
-          '*Jewish',
+          '*TrashTalk',
           'Seinfeld',
           'random',
           '*Comeback',
