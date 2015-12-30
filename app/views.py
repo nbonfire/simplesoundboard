@@ -71,7 +71,7 @@ def resume_volume():
 @app.before_request
 def before_request():
 	g.user = current_user
-	if g.user.is_authenticated():
+	if g.user.is_authenticated:
 		g.user.last_seen = datetime.utcnow()
 		db.session.add(g.user)
 		db.session.commit()
@@ -157,7 +157,7 @@ def playtag(tagname):
 	fxchannel.play(pygame.mixer.Sound(filetoplay))
 	return filetoplay
 	'''
-	if g.user is not None and g.user.is_authenticated():
+	if g.user is not None and g.user.is_authenticated:
 		source = g.user.nickname
 	else:
 		source = 'anonymous'
@@ -204,7 +204,7 @@ playtagunwrapped.lasttagtime={}
 @app.route('/login', methods = ['GET', 'POST'])
 @oid.loginhandler
 def login():
-	if g.user is not None and g.user.is_authenticated():
+	if g.user is not None and g.user.is_authenticated:
 		return redirect(url_for('index'))
 	form = LoginForm()
 	if form.validate_on_submit():
@@ -287,7 +287,7 @@ class SoundModelView(ModelView):
 	form_excluded_columns = ('name')
 	
 	def is_accessible(self):
-		if g.user.is_authenticated() and g.user.is_admin():
+		if g.user.is_authenticated and g.user.is_admin:
 			return True
 		else:
 			return False
@@ -303,7 +303,7 @@ class ThemeSongModelView(ModelView):
 	column_list = ('name', 'users')
 	form_excluded_columns = ('name')
 	def is_accessible(self):
-		if g.user.is_authenticated() and g.user.is_admin():
+		if g.user.is_authenticated and g.user.is_admin:
 			return True
 		else:
 			return False
@@ -317,7 +317,7 @@ class ThemeSongModelView(ModelView):
 class SoundFileAdmin(FileAdmin):
 	allowed_extensions=('wav', 'mp3', 'ogg')
 	def is_accessible(self):
-		if g.user.is_authenticated() and g.user.is_admin():
+		if g.user.is_authenticated and g.user.is_admin:
 			return True
 		else:
 			return False
@@ -328,7 +328,7 @@ class SoundFileAdmin(FileAdmin):
 class ThemeSongFileAdmin(FileAdmin):
 	allowed_extensions=('wav', 'mp3', 'ogg')
 	def is_accessible(self):
-		if g.user.is_authenticated() and g.user.is_admin():
+		if g.user.is_authenticated and g.user.is_admin:
 			return True
 		else:
 			return False
@@ -342,7 +342,7 @@ class UserModelView(ModelView):
 		urole=dict(
 			choices=[(0,"USER"), (1,"admin")]))
 	def is_accessible(self):
-		if g.user.is_authenticated() and g.user.is_admin():
+		if g.user.is_authenticated and g.user.is_admin:
 			return True
 		else:
 			return False
