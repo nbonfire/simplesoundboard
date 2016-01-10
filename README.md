@@ -5,15 +5,13 @@ A simple soundboard server to be run on an HTPC with a web interface. Getting to
 
 Requires: pygame, plus use pip to install packages from requirements.txt
 
-For videos,  get pyglet pyglet‑1.2alpha1.win32‑py2.7.exe from http://www.lfd.uci.edu/~gohlke/pythonlibs/#pyglet
-
  
 
 1) Create a virtualenv called flask
 
 virtualenv flask
 
-2) use that to install the contents of requirements.txt with pip
+2) use that to install the contents of requirements.txt with pip (source flask\bin\activate;pip install -r requirements.txt)
 
 3) install pygame into the flask folder
 
