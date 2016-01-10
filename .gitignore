@@ -48,3 +48,7 @@ nosetests.xml
 *.msi
 *.tmp
 static/images/*
+*.sqlite
+*.db
+flask/*
+tmp/*
