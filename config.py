@@ -5,6 +5,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 SERVER_NAME='0.0.0.0'
 SERVER_PORT=5000
 """
+SERVER_NAME='myserverurl'
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'soundboardtags.sqlite')
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
 CSRF_ENABLED = True
@@ -25,3 +26,21 @@ MAIL_PASSWORD = None
 
 # administrator list
 ADMINS = ['nick@bonfatti.net', 'zillioxj@gmail.com']
+
+TAGMAP = ['*Waiting',
+          '*TrashTalk',
+          'FunnyMusic',
+          'random',
+          '*Comeback',
+          '*Blowout',
+          '*CloseGame',
+          '*GameOver',
+          '*Windowshopping',
+          '*Fuckup',
+          '*BigSave',
+          '*FireExtinguished',
+          '*NiceGoal',
+          '*JockJams',
+          '*OneTimer',
+          '*OnFire',
+          ]
