@@ -43,13 +43,15 @@
     </section>
 	{% for filenames in filenamesandcategories %}
   {% if filenames['sounds']|length()>0 %}
-		<section id='{{filenames['category']}}'><div class="row"><!--div class="col-xs-12 col-md-12 col-lg-12"--><h3>{{ filenames['category'] }}</h3><!--/div-->
+		<section id='{{filenames['category']}}'><div class="row"><!--div class="col-xs-12 col-md-12 col-lg-12"--><h3><a href="#categorySounds{{loop.index}}" data-toggle="collapse">{{ filenames['category'] }}</a></h3><!--/div-->
+    <div class="btn-group collapse" id="categorySounds{{loop.index}}" role="group" aria-label="...">
 			{% for sound in filenames['sounds'] %}
 			<div class="col-xs-12 col-md-6 col-lg-6">
 
 				<button class="sound btn btn-primary btn-block" value="{{sound['file']}}" href="#">{{sound['name']}}</button>
 			</div>
 			{% endfor %}
+      </div>>
 		</div>
 		</section>
   {% endif %}
