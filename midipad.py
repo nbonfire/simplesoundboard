@@ -19,11 +19,15 @@ import sys
 import os
 import urllib2
 from config import SERVER_NAME, TAGMAP
+from app.decorators import async
 import pygame
 import pygame.midi
 from pygame.locals import *
 
-
+@async
+def fireoff(urlToFetch):
+	response=urllib2.urlopen(urlToFetch)
+	
 
 def input_main(device_id = None):
 	pygame.init()
@@ -80,7 +84,8 @@ def input_main(device_id = None):
 					print urlToFetch
 					
 					#response=playtagunwrapped(tagToPlay,source='midi')
-					response=urllib2.urlopen(urlToFetch)
+					fireoff(urlToFetch)
+					
 					
 
 		if i.poll():
