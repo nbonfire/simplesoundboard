@@ -20,7 +20,7 @@ clock = pygame.time.Clock()
 
 TAGMAP = ['*Waiting',
           '*TrashTalk',
-          'Seinfeld',
+          'FunnyMusic',
           'random',
           '*Comeback',
           '*Blowout',
