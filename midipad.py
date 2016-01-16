@@ -20,6 +20,7 @@ import os
 from config import SERVER_NAME, TAGMAP
 from app.decorators import async
 import requests
+import urllib2
 from Queue import Queue
 import pygame
 import pygame.midi
