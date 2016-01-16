@@ -38,7 +38,7 @@ def fireoff(urlToFetch):
 	_url_queue.put(urlToFetch)
 	print "added %s to queue" % urlToFetch
 	if controller:
-		global s = requests.Session()
+		global s
 		@async
 		def geturl(fetchThis):
 			s.get(fetchThis)
