@@ -45,8 +45,9 @@ def fireoff(urlToFetch):
 		global s
 		while _url_queue.empty()==False:
 			fetchThis=_url_queue.get()
-			s.get(urlToFetch)
+			r=s.get(urlToFetch)
 			_url_queue.task_done
+			print r
 			
 
 
