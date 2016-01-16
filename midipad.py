@@ -17,16 +17,39 @@ DEFAULT = 'random'
 
 import sys
 import os
-import urllib2
 from config import SERVER_NAME, TAGMAP
 from app.decorators import async
+import requests
+from Queue import Queue
 import pygame
 import pygame.midi
 from pygame.locals import *
 
+
+_url_queue=Queue()
+s = requests.Session()
+
 @async
 def fireoff(urlToFetch):
-	response=urllib2.urlopen(urlToFetch)
+	global _url_queue
+	controller=False
+	if _url_queue.empty():
+		controller=True
+	_url_queue.put(urlToFetch)
+	print "added %s to queue" % urlToFetch
+	if controller:
+		global s = requests.Session()
+		@async
+		def geturl(fetchThis):
+			s.get(fetchThis)
+
+		while _url_queue.empty()==False:
+			fetchThis=_url_queue.get()
+			geturl(fetchThis)
+			_url_queue.task_done
+			
+
+
 	
 
 def input_main(device_id = None):
