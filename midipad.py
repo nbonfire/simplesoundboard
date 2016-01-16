@@ -32,7 +32,7 @@ from pygame.locals import *
 _url_queue=Queue()
 s = requests.Session()
 adapter = requests.adapters.HTTPAdapter(pool_connections=100, pool_maxsize=100)
-sess.mount('http://',adapter)
+s.mount('http://',adapter)
 logging.basicConfig(level=logging.DEBUG)	
 
 @async
