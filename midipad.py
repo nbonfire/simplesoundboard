@@ -22,13 +22,16 @@ from app.decorators import async
 import requests
 import urllib2
 from Queue import Queue
+import logging
 import pygame
 import pygame.midi
 from pygame.locals import *
 
 
+
 _url_queue=Queue()
 s = requests.Session()
+logging.basicConfig(level=logging.DEBUG)	
 
 @async
 def fireoff(urlToFetch):
@@ -40,13 +43,9 @@ def fireoff(urlToFetch):
 	print "added %s to queue" % urlToFetch
 	if controller:
 		global s
-		@async
-		def geturl(fetchThis):
-			s.get(fetchThis)
-
 		while _url_queue.empty()==False:
 			fetchThis=_url_queue.get()
-			geturl(fetchThis)
+			s.get(urlToFetch)
 			_url_queue.task_done
 			
 
