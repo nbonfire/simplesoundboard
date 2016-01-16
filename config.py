@@ -29,7 +29,7 @@ ADMINS = ['nick@bonfatti.net', 'zillioxj@gmail.com']
 
 TAGMAP = ['*Waiting',
           '*TrashTalk',
-          'Funny%20Music',
+          'Funny Music',
           'random',
           '*Comeback',
           '*Blowout',
