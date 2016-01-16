@@ -106,7 +106,7 @@ def input_main(device_id = None):
 						print error
 						print 'no tag defined for that key, lets play a Jock Jam instead'
 						tagToPlay = DEFAULT
-					urlToFetch='http://'+SERVER_NAME+'/play/tag'+urllib2.quote(tagToPlay)
+					urlToFetch='http://'+SERVER_NAME+'/play/tag/'+urllib2.quote(tagToPlay)
 					print urlToFetch
 					
 					#response=playtagunwrapped(tagToPlay,source='midi')
