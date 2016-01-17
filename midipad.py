@@ -20,7 +20,7 @@ import os
 from config import SERVER_NAME, TAGMAP
 from app.decorators import async
 import requests
-import urllib2
+import urllib3
 from Queue import Queue
 import logging
 import pygame
@@ -30,14 +30,13 @@ from pygame.locals import *
 
 
 _url_queue=Queue()
-s = requests.Session()
-adapter = requests.adapters.HTTPAdapter(pool_connections=100, pool_maxsize=100)
-s.mount('http://',adapter)
+conn = urllib3.connection_from_url('http://'+SERVER_NAME+'/',maxsize=10)
+
 logging.basicConfig(level=logging.DEBUG)	
 
 @async
 def fireoff(urlToFetch):
-	global _url_queue
+	'''global _url_queue
 	controller=False
 	if _url_queue.empty():
 		controller=True
@@ -50,7 +49,8 @@ def fireoff(urlToFetch):
 			r=s.get(urlToFetch)
 			_url_queue.task_done
 			print r
-			
+	'''
+    conn.request('GET',urlToFetch)
 
 
 	
@@ -106,7 +106,7 @@ def input_main(device_id = None):
 						print error
 						print 'no tag defined for that key, lets play a Jock Jam instead'
 						tagToPlay = DEFAULT
-					urlToFetch='http://'+SERVER_NAME+'/play/tag/'+urllib2.quote(tagToPlay)
+					urlToFetch='/play/tag/'+urllib2.quote(tagToPlay)
 					print urlToFetch
 					
 					#response=playtagunwrapped(tagToPlay,source='midi')
