@@ -19,7 +19,6 @@ import sys
 import os
 from config import SERVER_NAME, TAGMAP
 from app.decorators import async
-import requests
 import urllib3
 from Queue import Queue
 import logging
