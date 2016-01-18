@@ -64,7 +64,6 @@ def before_request():
 		db.session.commit()
 
 @app.route("/")
-@app.route("/index")
 def index():
 	global TAGMAP
 	tags = [item for sublist in list(reversed(zip(*[iter(TAGMAP)]*4))) for item in sublist]
