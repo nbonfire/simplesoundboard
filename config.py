@@ -44,3 +44,4 @@ TAGMAP = ['*Waiting',
           '*OneTimer',
           '*OnFire',
           ]
+MUSICTAGS = ['Funny Music', '*JockJams']
