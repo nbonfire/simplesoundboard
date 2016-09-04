@@ -85,9 +85,11 @@ class User(db.Model):
 	def avatar(self, size):
 		return 'http://www.gravatar.com/avatar/' + md5(self.email).hexdigest() + '?d=identicon&r=x&s=' + str(size)
 
+	@property
 	def is_authenticated(self):
 		return True
 
+	@property
 	def is_admin(self):
 		if self.email in ADMINS:
 			return True
@@ -98,9 +100,11 @@ class User(db.Model):
 	def get_urole(self):
 		return self.urole
 
+	@property
 	def is_active(self):
 		return True
-
+		
+	@property
 	def is_anonymous(self):
 		return False
 	def hastheme(self):

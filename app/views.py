@@ -5,7 +5,7 @@ from flask.ext.admin import Admin, BaseView, expose
 from flask.ext.admin.contrib.sqla import ModelView
 from flask.ext.admin.contrib.fileadmin import FileAdmin
 from app import app, db, lm, oid, admin
-from config import TAGMAP
+from config import TAGMAP, MUSICTAGS
 from forms import LoginForm, EditForm
 from models import *
 from datetime import datetime, timedelta
@@ -13,16 +13,18 @@ from decorators import async
 from config import basedir
 from wtforms.fields import SelectField
 from Queue import Queue
-import glob
+import glob 
+from sqlalchemy.orm.exc import UnmappedInstanceError
 
 pygame.mixer.init()
 fxchannel=pygame.mixer.Channel(1)
+musicchannel=pygame.mixer.Channel(2)
 clock = pygame.time.Clock()
 
 
 
 
-          
+		  
 _theme_queue=Queue()
 @async
 def entrance_queue(theme):
@@ -54,16 +56,19 @@ def resume_volume():
 """
 
 
-
+'''
 @app.before_request
 def before_request():
-	g.user = current_user
-	if g.user.is_authenticated:
+	if current_user.is_authenticated:
+		g.user = current_user
 		g.user.last_seen = datetime.utcnow()
-		db.session.add(g.user)
-		db.session.commit()
+		#db.session.add(g.user)
+		#db.session.commit()
+'''
+	
 
 @app.route("/")
+@app.route("/index")
 def index():
 	global TAGMAP
 	tags = [item for sublist in list(reversed(zip(*[iter(TAGMAP)]*4))) for item in sublist]
@@ -113,6 +118,7 @@ def play(name):
 	#print name
 	if not pygame.mixer.get_init():
 		pygame.mixer.init();
+
 	fxchannel.play(pygame.mixer.Sound(name))
 	#pygame.mixer.music.load(name)
 	#pygame.mixer.music.play()
@@ -143,24 +149,27 @@ def playtag(tagname):
 	fxchannel.play(pygame.mixer.Sound(filetoplay))
 	return filetoplay
 	'''
-	if g.user is not None and g.user.is_authenticated:
-		source = g.user.nickname
-	else:
-		source = 'anonymous'
-	return playtagunwrapped(tagname,source)
+	#if g.user is not None and g.user.is_authenticated:
+	#	source = g.user.nickname
+	#else:
+	#	source = 'anonymous'
+
+	return playtagunwrapped(tagname,'anonymous') #'anonymous' was source instead
 
 
 def playtagunwrapped(tagname,source):
-	global fxchannel	
+	global fxchannel
+	global musicchannel	
 	if not pygame.mixer.get_init():
 		pygame.mixer.init();
 	
 	if source in playtagunwrapped.sources:
+		if tagname == 'random':
+			tag = Tag.query.order_by(func.random()).first()
+		else:
+			tag = get_or_create(Tag, name=tagname);
 		if (tagname != playtagunwrapped.lasttag[source]) or  (datetime.utcnow() > (playtagunwrapped.lasttagtime[source] + timedelta(seconds=3))):
-			if tagname == 'random':
-				tag = Tag.query.order_by(func.random()).first()
-			else:
-				tag = get_or_create(Tag, name=tagname);
+			
 			filetoplay=tag.randomsound().filename
 			playtagunwrapped.lasttag[source] = tagname
 			playtagunwrapped.lasttagfilename[source] = filetoplay
@@ -179,8 +188,10 @@ def playtagunwrapped(tagname,source):
 		playtagunwrapped.lasttagfilename[source]=filetoplay
 		playtagunwrapped.lasttagtime[source]=datetime.utcnow()
 	#print filetoplay
-
-	fxchannel.play(pygame.mixer.Sound(filetoplay))
+	if tag.name in MUSICTAGS:
+		musicchannel.play(pygame.mixer.Sound(filetoplay))
+	else:
+		fxchannel.play(pygame.mixer.Sound(filetoplay))
 	return filetoplay
 playtagunwrapped.sources=[]
 playtagunwrapped.lasttag={}
@@ -188,7 +199,7 @@ playtagunwrapped.lasttagfilename={}
 playtagunwrapped.lasttagtime={}
 
 @app.route('/login', methods = ['GET', 'POST'])
-@oid.loginhandler
+#@oid.loginhandler
 def login():
 	if g.user is not None and g.user.is_authenticated:
 		return redirect(url_for('index'))
@@ -201,7 +212,7 @@ def login():
 		form = form,
 		providers = app.config['OPENID_PROVIDERS'])
 
-@oid.after_login
+#@oid.after_login
 def after_login(resp):
 	if resp.email is None or resp.email == "":
 		flash('Invalid login. Please try again.')
@@ -228,7 +239,7 @@ def after_login(resp):
 
 @lm.user_loader
 def load_user(id):
-    return User.query.get(int(id))
+	return User.query.get(int(id))
 
 @app.route('/logout')
 def logout():
@@ -236,7 +247,7 @@ def logout():
 	return redirect(url_for('index'))
 
 @app.route('/user/<nickname>')
-@login_required
+#@login_required
 def user(nickname):
 	user = User.query.filter_by(nickname = nickname).first()
 	if user == None:
@@ -251,21 +262,22 @@ def user(nickname):
 		posts = posts)
 
 @app.route('/edit', methods = ['GET', 'POST'])
-@login_required
+#@login_required
 def edit():
-    form = EditForm()
-    if form.validate_on_submit():
-        g.user.nickname = form.nickname.data
-        g.user.theme = form.themesong.data
-        db.session.add(g.user)
-        db.session.commit()
-        flash('Your changes have been saved.')
-        return redirect(url_for('edit'))
-    else:
-        form.nickname.data = g.user.nickname
-        form.themesong.data = g.user.theme
-    return render_template('edit.html',
-        form = form)
+	form = EditForm()
+	'''if g.user is not None and form.validate_on_submit():
+		g.user.nickname = form.nickname.data
+		g.user.theme = form.themesong.data
+		db.session.add(g.user)
+		db.session.commit()
+		flash('Your changes have been saved.')
+		return redirect(url_for('edit'))
+	else:
+		form.nickname.data = g.user.nickname
+		form.themesong.data = g.user.theme
+	return render_template('edit.html',
+		form = form)'''
+	
 
 class SoundModelView(ModelView):
 	column_display_all_relations=True
@@ -273,10 +285,10 @@ class SoundModelView(ModelView):
 	form_excluded_columns = ('name')
 	
 	def is_accessible(self):
-		if g.user.is_authenticated and g.user.is_admin:
+		#if g.user is not None and g.user.is_authenticated and g.user.is_admin:
 			return True
-		else:
-			return False
+		#else:
+		#	return False
 	def on_model_change(self, form, model, is_created):
 		
 
@@ -289,10 +301,10 @@ class ThemeSongModelView(ModelView):
 	column_list = ('name', 'users')
 	form_excluded_columns = ('name')
 	def is_accessible(self):
-		if g.user.is_authenticated and g.user.is_admin:
+		#if g.user is not None and g.user.is_authenticated and g.user.is_admin:
 			return True
-		else:
-			return False
+		#else:
+		#	return False
 	def on_model_change(self, form, model, is_created):
 		
 
@@ -303,10 +315,10 @@ class ThemeSongModelView(ModelView):
 class SoundFileAdmin(FileAdmin):
 	allowed_extensions=('wav', 'mp3', 'ogg')
 	def is_accessible(self):
-		if g.user.is_authenticated and g.user.is_admin:
+		#if g.user is not None and g.user.is_authenticated and g.user.is_admin:
 			return True
-		else:
-			return False
+		#else:
+		#	return False
 	def on_file_upload(self, directory, path, filename):
 		db.session.add(Sound(filename=filename))
 		db.session.commit()
@@ -314,10 +326,10 @@ class SoundFileAdmin(FileAdmin):
 class ThemeSongFileAdmin(FileAdmin):
 	allowed_extensions=('wav', 'mp3', 'ogg')
 	def is_accessible(self):
-		if g.user.is_authenticated and g.user.is_admin:
+		#if g.user is not None and g.user.is_authenticated and g.user.is_admin:
 			return True
-		else:
-			return False
+		#else:
+		#	return False
 	def on_file_upload(self, directory, path, filename):
 		db.session.add(ThemeSong(filename=filename))
 		db.session.commit()
@@ -328,10 +340,10 @@ class UserModelView(ModelView):
 		urole=dict(
 			choices=[(0,"USER"), (1,"admin")]))
 	def is_accessible(self):
-		if g.user.is_authenticated and g.user.is_admin:
+		#if g.user is not None and g.user.is_authenticated and g.user.is_admin:
 			return True
-		else:
-			return False
+		#else:
+		#	return False
 admin.add_view(SoundModelView(Sound, db.session))
 admin.add_view(ThemeSongModelView(ThemeSong, db.session, name="Theme Songs"))
 admin.add_view(ModelView(Tag, db.session))
