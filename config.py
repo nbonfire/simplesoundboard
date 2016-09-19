@@ -5,10 +5,10 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 SERVER_NAME='0.0.0.0'
 SERVER_PORT=5000
 """
-#SERVER_NAME='myserverurl'
+SERVER_NAME='john-htpc'
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'soundboardtags.sqlite')
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
-#CSRF_ENABLED = True
+CSRF_ENABLED = True
 SECRET_KEY = 'you-will-never-guess'
 
 OPENID_PROVIDERS = [
@@ -28,9 +28,9 @@ MAIL_PASSWORD = None
 ADMINS = ['nick@bonfatti.net', 'zillioxj@gmail.com']
 
 TAGMAP = ['*Waiting',
-          '*TrashTalk',
-          'Funny Music',
-          'random',
+          '*CHEWCREW',
+          '*FunnyMusic',
+          '*Angry',
           '*Comeback',
           '*Blowout',
           '*CloseGame',
@@ -45,4 +45,4 @@ TAGMAP = ['*Waiting',
           '*OnFire',
           ]
 
-MUSICTAGS = ['Funny Music', '*JockJams']
+MUSICTAGS = ['*FunnyMusic', '*JockJams']
