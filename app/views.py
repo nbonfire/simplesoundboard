@@ -8,6 +8,7 @@ from app import app, db, lm, oid, admin
 from config import TAGMAP
 from forms import LoginForm, EditForm
 from models import *
+from sqlalchemy.orm.exc import UnmappedInstanceError
 from datetime import datetime, timedelta
 from decorators import async
 from config import basedir
@@ -60,8 +61,11 @@ def before_request():
 	g.user = current_user
 	if g.user.is_authenticated:
 		g.user.last_seen = datetime.utcnow()
-		db.session.add(g.user)
-		db.session.commit()
+		try:
+			db.session.add(g.user._get_current_object())
+			db.session.commit()
+		except UnmappedInstanceError:
+			pass
 
 @app.route("/")
 def index():
