@@ -53,3 +53,6 @@ static/images/*
 flask/*
 tmp/*
 config.py
+sounds/*
+themes/*
+
