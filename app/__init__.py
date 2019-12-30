@@ -1,7 +1,7 @@
 from flask import Flask 
 from flask.ext.sqlalchemy import SQLAlchemy 
 import os, glob
-from flask.ext.login import LoginManager
+from flask.ext.login import LoginManager, AnonymousUserMixin
 from flask.ext.openid import OpenID
 from flask.ext.admin import Admin
 from flask.ext.script import Manager 
@@ -34,9 +34,17 @@ migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
 
+class SBAnonymousUser(AnonymousUserMixin):
+    nickname = "anon"
+    @property
+    def is_admin(self):
+        return False
+    
+
 lm = LoginManager()
 lm.init_app(app)
 lm.login_view='login'
+lm.anonymous_user=SBAnonymousUser
 
 oid = OpenID(app, os.path.join(basedir, 'tmp'))
 

@@ -64,8 +64,8 @@ def before_request():
 		try:
 			db.session.add(g.user._get_current_object())
 			db.session.commit()
-		except UnmappedInstanceError:
-			pass
+		except UnmappedInstanceError as e:
+			print(e)
 
 @app.route("/")
 def index():
