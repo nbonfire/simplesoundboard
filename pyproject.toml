@@ -1,0 +1,24 @@
+[project]
+name = "simplesoundboard"
+version = "0.1.0"
+description = "Game-night soundboard server for an HTPC: web UI + MIDI control pad"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.13",
+    "flask>=3.0",
+    "flask-admin>=1.6",
+    "flask-login>=0.6",
+    "flask-migrate>=4.0",
+    "flask-sqlalchemy>=3.1",
+    "flask-wtf>=1.2",
+    "pygame>=2.6",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

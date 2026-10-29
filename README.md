@@ -1,24 +1,36 @@
 simplesoundboard
 ================
 
-A simple soundboard server to be run on an HTPC with a web interface. Getting to be not-so-simple now that we've added midi input, tags, user logins, and entrance music.
+A simple soundboard server to be run on an HTPC with a web interface, MIDI control-pad support, and a basic-auth admin panel.
 
-Requires: pygame, plus use pip to install packages from requirements.txt
+## Setup
 
- 
+Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/):
 
-1) Create a virtualenv called flask
+    uv sync
 
-virtualenv flask
+Create the database (and apply migrations after model changes):
 
-2) use that to install the contents of requirements.txt with pip (source flask\bin\activate;pip install -r requirements.txt)
+    uv run flask --app app db upgrade
+    uv run flask --app app db migrate   # only after changing models
 
-3) install pygame into the flask folder
+## Run
 
-4) init the DB
+    uv run python run.py                 # serves on port 80
+    SOUNDBOARD_PORT=8080 uv run python run.py
 
-dbcontrol.py db init
+Environment variables:
 
-dbcontrol.py db migrate
+- `SOUNDBOARD_PORT` — HTTP port (default 80)
+- `SOUNDBOARD_BASIC_AUTH` — `"user:password"` protecting `/admin` (default `admin:admin`)
+- `SOUNDBOARD_MIDI` — set to `1` to start the MIDI control-pad listener (needs a MIDI input device)
 
-dbcontrol.py db upgrade
+## Use
+
+- Web UI: `GET /` — open on the LAN, no auth required.
+- Admin panel: `GET /admin/` — HTTP Basic auth. Upload sound/theme files there, or drop files into `sounds/` and `themes/` and hit `GET /load` to import them.
+- MIDI pad: load the "Chromatic" preset in the MPD18 editor, run with `SOUNDBOARD_MIDI=1`. `python midi_input.py --list` shows available devices.
+
+## Tests
+
+    uv run pytest

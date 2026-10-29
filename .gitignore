@@ -1,54 +1,22 @@
+# Python
+__pycache__/
 *.py[cod]
 
-# C extensions
-*.so
+# Tooling
+.venv/
+.pytest_cache/
 
-# Packages
-*.egg
-*.egg-info
-dist
-build
-eggs
-parts
-bin
-var
-sdist
-develop-eggs
-.installed.cfg
-lib
-lib64
-__pycache__
+# Local app state
+tmp/
+*.sqlite
+*.sqlite.old
 
-# Installer logs
-pip-log.txt
-
-# Unit test / coverage reports
-.coverage
-.tox
-nosetests.xml
-
-# Translations
-*.mo
-
-# Mr Developer
-.mr.developer.cfg
-.project
-.pydevproject
-#others
-*.exe
-*~
-*.lock
-*.DS_Store
-*.swp
-*.out
+# User-provided content
+sounds/
+themes/
 *.mp3
 *.wav
-*.dll
-*.zip
-*.msi
-*.tmp
 static/images/*
-*.sqlite
-*.db
-flask/*
-tmp/*
+
+# Legacy
+flask/
