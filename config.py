@@ -1,32 +1,22 @@
 #config.py
 import os
+
 basedir = os.path.abspath(os.path.dirname(__file__))
-"""
-SERVER_NAME='0.0.0.0'
-SERVER_PORT=5000
-"""
-SERVER_NAME='john-htpc'
+
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'soundboardtags.sqlite')
-SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
 CSRF_ENABLED = True
 SECRET_KEY = 'you-will-never-guess'
 
-OPENID_PROVIDERS = [
-    { 'name': 'Google', 'url': 'https://www.google.com/accounts/o8/id' },
-    { 'name': 'Yahoo', 'url': 'https://me.yahoo.com' },
-    { 'name': 'AOL', 'url': 'http://openid.aol.com/<username>' },
-    { 'name': 'Flickr', 'url': 'http://www.flickr.com/<username>' },
-    { 'name': 'MyOpenID', 'url': 'https://www.myopenid.com' }]
+# HTTP Basic auth for the admin panel, "user:password"
+BASIC_AUTH = os.environ.get('SOUNDBOARD_BASIC_AUTH', 'admin:admin')
 
-# mail server settings
-MAIL_SERVER = 'localhost'
-MAIL_PORT = 25
-MAIL_USERNAME = None
-MAIL_PASSWORD = None
+# Enable the MIDI control-pad listener (requires a MIDI input device)
+MIDI_INPUT_ENABLED = os.environ.get('SOUNDBOARD_MIDI') == '1'
 
-# administrator list
-ADMINS = ['nick@bonfatti.net', 'zillioxj@gmail.com']
+# Host for the standalone pad driver (midipad.py)
+SERVER_NAME = os.environ.get('SOUNDBOARD_HOST', 'localhost')
 
+# Pad keys: MIDI notes 36..80 map to these tags (4 across in the UI)
 TAGMAP = ['*Waiting',
           '*CHEWCREW',
           '*FunnyMusic',
@@ -45,4 +35,14 @@ TAGMAP = ['*Waiting',
           '*OnFire',
           ]
 
+# Tags played on the music channel (channel 2) so they can overlap fx on channel 1
 MUSICTAGS = ['*FunnyMusic', '*JockJams']
+
+# mail server settings (error logging)
+MAIL_SERVER = 'localhost'
+MAIL_PORT = 25
+MAIL_USERNAME = None
+MAIL_PASSWORD = None
+
+# administrator list
+ADMINS = ['nick@bonfatti.net', 'zillioxj@gmail.com']

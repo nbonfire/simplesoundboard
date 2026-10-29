@@ -1,12 +1,7 @@
-#!flask/bin/python
-from app import app
-#from config import SERVER_NAME, SERVER_PORT
-# debug mode
-#app.run(host='0.0.0.0', port=80, debug = True)
-# gevent wsgi
-from gevent.wsgi import WSGIServer
+#!/usr/bin/env python3
+import os
 
-'''
-http_server = WSGIServer(('john-htpc', 80), app)
-http_server.serve_forever()
-'''
+from app import app
+
+port = int(os.environ.get('SOUNDBOARD_PORT', '80'))
+app.run(host='0.0.0.0', port=port, debug=False)

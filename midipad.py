@@ -1,132 +1,107 @@
-#midipad.py
+# midipad.py
+#
+#  Standalone MIDI control pad driver. Runs outside the app and fires
+#  HTTP requests at the running soundboard:
+#
+#     uv run python midipad.py
+#
+#  Uses the default MIDI input device (or: python midipad.py --device N).
 
+import logging
+import sys
+from urllib.parse import quote
+
+import pygame
+import pygame.midi
+from pygame.locals import KEYDOWN, QUIT
+import urllib3
+
+from config import SERVER_NAME, TAGMAP
+from app.decorators import asynctask
 
 #
 #  Midi control pad stuff goes here:
 #
 
-chromatic = range(36,81) # Values for the "Chromatic" preset, 36 through 80
+chromatic = range(36, 81)  # Values for the "Chromatic" preset, 36 through 80
 
 PADMAP = chromatic
 
-# Eventually I'll implement a "favorites" in the model to replace this. For now, hardcoded favorite tags to use on the mpd.
-
-
-
+# Fallback tag when the pressed key has no entry in TAGMAP
 DEFAULT = 'random'
 
-import sys
-import os
-from config import SERVER_NAME, TAGMAP
-from app.decorators import async
-import urllib3
-import urllib2
-from Queue import Queue
-import logging
-import pygame
-import pygame.midi
-from pygame.locals import *
+logging.basicConfig(level=logging.DEBUG)
+
+_conn = urllib3.PoolManager(maxsize=10)
 
 
-
-_url_queue=Queue()
-conn = urllib3.connection_from_url('http://'+SERVER_NAME+'/',maxsize=10)
-
-logging.basicConfig(level=logging.DEBUG)	
-
-@async
+@asynctask
 def fireoff(urlToFetch):
-	'''global _url_queue
-	controller=False
-	if _url_queue.empty():
-		controller=True
-	_url_queue.put(urlToFetch)
-	print "added %s to queue" % urlToFetch
-	if controller:
-		global s
-		while _url_queue.empty()==False:
-			fetchThis=_url_queue.get()
-			r=s.get(urlToFetch)
-			_url_queue.task_done
-			print r
-	'''
-	conn.request('GET',urlToFetch)
+    _conn.request('GET', urlToFetch)
 
 
-	
+def input_main(device_id=None):
+    try:
+        pygame.init()
+        pygame.fastevent.init()
+        pygame.midi.init()
+    except Exception as error:
+        logging.warning('MIDI input unavailable: %s', error)
+        return
 
-def input_main(device_id = None):
-	pygame.init()
-	pygame.fastevent.init()
-	event_get = pygame.fastevent.get
-	event_post = pygame.fastevent.post
-	pygame.midi.init()
+    if device_id is None:
+        input_id = pygame.midi.get_default_input_id()
+    else:
+        input_id = device_id
+    if input_id is None or input_id == -1:  # -1 is pygame's "no device" sentinel
+        logging.warning('no default MIDI input device')
+        return
 
-	#_print_device_info()
+    logging.info("using midi input_id :%s:", input_id)
+    i = pygame.midi.Input(input_id)
+    event_get = pygame.fastevent.get
+    event_post = pygame.fastevent.post
 
+    going = True
+    while going:
+        events = event_get()
+        for e in events:
+            if e.type in [QUIT]:
+                going = False
+            if e.type in [KEYDOWN]:
+                going = False
+            if e.type in [pygame.midi.MIDIIN]:
+                #
+                # THIS IS WHERE ALL THE GOOD SHIT GOES
+                #
+                # CC 176 (volume slider) intentionally not handled
+                if e.dict['status'] == 144:  # 144 is note on
+                    logging.info('key %s pressed', e.dict['data1'])
+                    try:
+                        tagToPlay = TAGMAP[PADMAP.index(e.dict['data1'])]
+                    except Exception:
+                        logging.warning('no tag defined for that key, playing default')
+                        tagToPlay = DEFAULT
+                    logging.info('play tag %s', tagToPlay)
+                    urlToFetch = 'http://' + SERVER_NAME + '/play/tag/' + quote(tagToPlay)
+                    logging.info(urlToFetch)
+                    fireoff(urlToFetch)
 
-	if device_id is None:
-		input_id = pygame.midi.get_default_input_id()
-	else:
-		input_id = device_id
+        if i.poll():
+            midi_events = i.read(10)
 
-	print ("using midi input_id :%s:" % input_id)
-	i = pygame.midi.Input( input_id )
+            # convert them into pygame events
+            midi_evs = pygame.midi.midis2events(midi_events, i.device_id)
 
-	#pygame.display.set_mode((1,1))
+            for m_e in midi_evs:
+                event_post(m_e)
 
-
-
-	going = True
-	while going:
-		events = event_get()
-		for e in events:
-			if e.type in [QUIT]:
-				going = False
-			if e.type in [KEYDOWN]:
-				going = False
-			if e.type in [pygame.midi.MIDIIN]:
-				#
-				# THIS IS WHERE ALL THE GOOD SHIT GOES
-				#
-				if e.dict['status']==176: #176 is the volume slider
-					print 'volume adjust: '+str(e.dict['data2'])
-					# lowest value 0, highest 127, stored in e.dict['data2']
-					# TODO: add xbmc json-rpc clal to set volume based on this
-					# For now, use nircmd and a system() call 
-					volumeLevel=e.dict['data2']/127.0
-					returnval=os.system('NirCmd.exe setappvolume xbmc.exe ' + str(volumeLevel))
-				if e.dict['status']==144: #144 is key down
-					print 'key '+str(e.dict['data1'])+' pressed'
-					try:
-						tagToPlay = TAGMAP[PADMAP.index(e.dict['data1'])]
-						print 'play tag ' + tagToPlay
-					except Exception, error:
-						#raise e
-						print error
-						print 'no tag defined for that key, lets play a Jock Jam instead'
-						tagToPlay = DEFAULT
-					urlToFetch='/play/tag/'+urllib2.quote(tagToPlay)
-					print urlToFetch
-					
-					#response=playtagunwrapped(tagToPlay,source='midi')
-					fireoff(urlToFetch)
-					
-					
-
-		if i.poll():
-			midi_events = i.read(10)
-			
-			# convert them into pygame events.
-			midi_evs = pygame.midi.midis2events(midi_events, i.device_id)
-
-			for m_e in midi_evs:
-				event_post( m_e )
-
-	del i
-	pygame.midi.quit()
-
+    del i
+    pygame.midi.quit()
 
 
 if __name__ == '__main__':
-	input_main()
+    if len(sys.argv) > 1:
+        input_main(device_id=int(sys.argv[1]))
+    else:
+        input_main()
