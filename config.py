@@ -20,4 +20,4 @@ MAIL_USERNAME = None
 MAIL_PASSWORD = None
 
 # administrator list
-ADMINS = ['nick@bonfatti.net', 'zillioxj@gmail.com']
+ADMINS = ['someone@nospam.net', 'someoneelse@nospam.com']
