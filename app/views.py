@@ -22,25 +22,28 @@ from app.models import Sound, Tag, ThemeSong, User, get_or_create, stripfilename
 
 pygame.mixer.init()
 fxchannel = pygame.mixer.Channel(1)
+musicchannel = pygame.mixer.Channel(2)
+
 clock = pygame.time.Clock()
 
-TAGMAP = ['*Waiting',
-          '*TrashTalk',
-          'FunnyMusic',
-          'random',
-          '*Comeback',
-          '*Blowout',
-          '*CloseGame',
-          '*GameOver',
-          '*Windowshopping',
-          '*Fuckup',
-          '*BigSave',
-          '*FireExtinguished',
-          '*NiceGoal',
-          '*JockJams',
-          '*OneTimer',
-          '*OnFire',
-          ]
+TAGMAP = [
+    "*Waiting",
+    "*TrashTalk",
+    "FunnyMusic",
+    "random",
+    "*Comeback",
+    "*Blowout",
+    "*CloseGame",
+    "*GameOver",
+    "*Windowshopping",
+    "*Fuckup",
+    "*BigSave",
+    "*FireExtinguished",
+    "*NiceGoal",
+    "*JockJams",
+    "*OneTimer",
+    "*OnFire",
+]
 
 _theme_queue = queue.Queue()
 _entrance_played = False
@@ -48,22 +51,22 @@ _midi_started = False
 
 
 def _basic_authenticated():
-    header = request.headers.get('Authorization', '')
-    if not header.startswith('Basic '):
+    header = request.headers.get("Authorization", "")
+    if not header.startswith("Basic "):
         return False
     try:
-        decoded = base64.b64decode(header[6:]).decode('utf-8')
+        decoded = base64.b64decode(header[6:]).decode("utf-8")
     except Exception:
         return False
-    return decoded == app.config['BASIC_AUTH']
+    return decoded == app.config["BASIC_AUTH"]
 
 
 def _login_admin():
     """Sign in the single admin user, creating it (with a random theme) on first use."""
     global _entrance_played
-    user = User.query.filter_by(urole='ADMIN').first()
+    user = User.query.filter_by(urole="ADMIN").first()
     if user is None:
-        user = User(nickname='admin', urole='ADMIN')
+        user = User(nickname="admin", urole="ADMIN")
         if ThemeSong.query.count() > 0:
             user.theme = ThemeSong.random_themesong()
         db.session.add(user)
@@ -77,13 +80,13 @@ def _login_admin():
 
 @app.before_request
 def check_admin_auth():
-    if not request.path.startswith('/admin'):
+    if not request.path.startswith("/admin"):
         return None
     if _basic_authenticated():
         _login_admin()
         return None
-    response = Response('Authentication required', 401)
-    response.headers['WWW-Authenticate'] = 'Basic realm="HitzBoard Admin"'
+    response = Response("Authentication required", 401)
+    response.headers["WWW-Authenticate"] = 'Basic realm="HitzBoard Admin"'
     return response
 
 
@@ -100,39 +103,46 @@ def before_request():
 @app.route("/index")
 def index():
     global TAGMAP
-    groups = list(zip(*[iter(TAGMAP)]*4))
+    groups = list(zip(*[iter(TAGMAP)] * 4))
     tags = [item for sublist in reversed(groups) for item in sublist]
-    tagsandsounds = [{
-        'category': x,
-        'sounds': [
-            {'file': y.filename, 'name': y.name} for y in sorted(x.sounds, key=lambda s: s.name)
-        ]
-    } for x in db.session.query(Tag).order_by(Tag.name).all()]
-    return render_template('soundboard.html', tags=tags,
-                           filenamesandcategories=tagsandsounds,
-                           jqueryurl=url_for('static', filename='js/jquery.min.js'))
+    tagsandsounds = [
+        {
+            "category": x,
+            "sounds": [
+                {"file": y.filename, "name": y.name}
+                for y in sorted(x.sounds, key=lambda s: s.name)
+            ],
+        }
+        for x in db.session.query(Tag).order_by(Tag.name).all()
+    ]
+    return render_template(
+        "soundboard.html",
+        tags=tags,
+        filenamesandcategories=tagsandsounds,
+        jqueryurl=url_for("static", filename="js/jquery.min.js"),
+    )
 
 
-@app.route('/load')
+@app.route("/load")
 def loadsounds():
-    soundfilenames = glob.glob('sounds/*.wav')
-    soundfilenames.extend(glob.glob('sounds/*.mp3'))
+    soundfilenames = glob.glob("sounds/*.wav")
+    soundfilenames.extend(glob.glob("sounds/*.mp3"))
 
     for filename in soundfilenames:
         get_or_create(Sound, filename=filename)
 
-    themefilenames = glob.glob('themes/*.wav')
-    themefilenames.extend(glob.glob('themes/*.mp3'))
+    themefilenames = glob.glob("themes/*.wav")
+    themefilenames.extend(glob.glob("themes/*.mp3"))
 
     for filename in themefilenames:
         get_or_create(ThemeSong, filename=filename)
 
-    subdir_sounds = glob.glob('sounds/*/*.wav')
-    subdir_sounds.extend(glob.glob('sounds/*/*.mp3'))
+    subdir_sounds = glob.glob("sounds/*/*.wav")
+    subdir_sounds.extend(glob.glob("sounds/*/*.mp3"))
 
     for f in subdir_sounds:
-        newname = os.path.join('sounds', os.path.basename(f))
-        tagname = os.path.relpath(os.path.dirname(f), 'sounds')
+        newname = os.path.join("sounds", os.path.basename(f))
+        tagname = os.path.relpath(os.path.dirname(f), "sounds")
         tag = get_or_create(Tag, name=tagname)
         os.rename(f, newname)
         asound = get_or_create(Sound, filename=newname)
@@ -145,16 +155,26 @@ def loadsounds():
 @app.route("/play/sounds/<name>")
 def play(name):
     global fxchannel
-    name = os.path.join('sounds', name)
+    name = os.path.join("sounds", name)
     if not pygame.mixer.get_init():
         pygame.mixer.init()
     fxchannel.play(pygame.mixer.Sound(name))
     return "ok"
 
 
+@app.route("/play/music/<name>")
+def playmusic(name):
+    global musicchannel
+    name = os.path.join("music", name)
+    if not pygame.mixer.get_init():
+        pygame.mixer.init()
+    musicchannel.play(pygame.mixer.Sound(name))
+    return "ok"
+
+
 @app.route("/play/tag/<tagname>")
 def playtag(tagname):
-    return playtagunwrapped(tagname, request.remote_addr or 'anonymous')
+    return playtagunwrapped(tagname, request.remote_addr or "anonymous")
 
 
 def playtagunwrapped(tagname, source):
@@ -164,8 +184,10 @@ def playtagunwrapped(tagname, source):
 
     if source in playtagunwrapped.sources:
         if (tagname != playtagunwrapped.lasttag[source]) or (
-                datetime.now(timezone.utc) > (playtagunwrapped.lasttagtime[source] + timedelta(seconds=3))):
-            if tagname == 'random':
+            datetime.now(timezone.utc)
+            > (playtagunwrapped.lasttagtime[source] + timedelta(seconds=3))
+        ):
+            if tagname == "random":
                 tag = Tag.query.order_by(func.random()).first()
             else:
                 tag = get_or_create(Tag, name=tagname)
@@ -177,7 +199,7 @@ def playtagunwrapped(tagname, source):
             filetoplay = playtagunwrapped.lasttagfilename[source]
             playtagunwrapped.lasttagtime[source] = datetime.now(timezone.utc)
     else:
-        if tagname == 'random':
+        if tagname == "random":
             tag = Tag.query.order_by(func.random()).first()
         else:
             tag = get_or_create(Tag, name=tagname)
@@ -191,7 +213,6 @@ def playtagunwrapped(tagname, source):
     return filetoplay
 
 
-
 playtagunwrapped.sources = []
 playtagunwrapped.lasttag = {}
 playtagunwrapped.lasttagfilename = {}
@@ -203,21 +224,21 @@ def load_user(id):
     return db.session.get(User, int(id))
 
 
-@app.route('/user/<nickname>')
+@app.route("/user/<nickname>")
 @login_required
 def user(nickname):
     user = User.query.filter_by(nickname=nickname).first()
     if user is None:
-        flash('User ' + nickname + ' not found.')
-        return redirect(url_for('index'))
+        flash("User " + nickname + " not found.")
+        return redirect(url_for("index"))
     posts = [
-        {'author': user, 'body': 'Test post #1'},
-        {'author': user, 'body': 'Test post #2'}
+        {"author": user, "body": "Test post #1"},
+        {"author": user, "body": "Test post #2"},
     ]
-    return render_template('user.html', user=user, posts=posts)
+    return render_template("user.html", user=user, posts=posts)
 
 
-@app.route('/edit', methods=['GET', 'POST'])
+@app.route("/edit", methods=["GET", "POST"])
 @login_required
 def edit():
     form = EditForm(original_nickname=g.user.nickname)
@@ -226,19 +247,19 @@ def edit():
         g.user.theme = ThemeSong.query.filter_by(name=form.themesong.data).first()
         db.session.add(g.user)
         db.session.commit()
-        flash('Your changes have been saved.')
-        return redirect(url_for('edit'))
+        flash("Your changes have been saved.")
+        return redirect(url_for("edit"))
     else:
         form.nickname.data = g.user.nickname
         if g.user.theme is not None:
             form.themesong.data = g.user.theme.name
-    return render_template('edit.html', form=form)
+    return render_template("edit.html", form=form)
 
 
 class SoundModelView(ModelView):
     column_display_all_relations = True
-    column_list = ('name', 'tags')
-    form_excluded_columns = ('name',)
+    column_list = ("name", "tags")
+    form_excluded_columns = ("name",)
 
     def is_accessible(self):
         return bool(g.user.is_authenticated and g.user.is_admin())
@@ -250,8 +271,8 @@ class SoundModelView(ModelView):
 
 
 class ThemeSongModelView(ModelView):
-    column_list = ('name', 'users')
-    form_excluded_columns = ('name',)
+    column_list = ("name", "users")
+    form_excluded_columns = ("name",)
 
     def is_accessible(self):
         return bool(g.user.is_authenticated and g.user.is_admin())
@@ -263,7 +284,7 @@ class ThemeSongModelView(ModelView):
 
 
 class SoundFileAdmin(FileAdmin):
-    allowed_extensions = ('wav', 'mp3', 'ogg')
+    allowed_extensions = ("wav", "mp3", "ogg")
 
     def is_accessible(self):
         return bool(g.user.is_authenticated and g.user.is_admin())
@@ -274,7 +295,7 @@ class SoundFileAdmin(FileAdmin):
 
 
 class ThemeSongFileAdmin(FileAdmin):
-    allowed_extensions = ('wav', 'mp3', 'ogg')
+    allowed_extensions = ("wav", "mp3", "ogg")
 
     def is_accessible(self):
         return bool(g.user.is_authenticated and g.user.is_admin())
@@ -286,9 +307,7 @@ class ThemeSongFileAdmin(FileAdmin):
 
 class UserModelView(ModelView):
     can_create = False
-    form_args = dict(
-        urole=dict(
-            choices=[('USER', 'USER'), ('ADMIN', 'ADMIN')]))
+    form_args = dict(urole=dict(choices=[("USER", "USER"), ("ADMIN", "ADMIN")]))
 
     def is_accessible(self):
         return bool(g.user.is_authenticated and g.user.is_admin())
@@ -298,13 +317,20 @@ admin.add_view(SoundModelView(Sound, db))
 admin.add_view(ThemeSongModelView(ThemeSong, db, name="Theme Songs"))
 admin.add_view(ModelView(Tag, db))
 admin.add_view(UserModelView(User, db))
-admin.add_view(SoundFileAdmin(os.path.join(basedir, 'sounds'), '/sounds/', name='Upload Sounds'))
-admin.add_view(ThemeSongFileAdmin(os.path.join(basedir, 'themes'), '/themes/', name='Upload Theme Songs'))
+admin.add_view(
+    SoundFileAdmin(os.path.join(basedir, "sounds"), "/sounds/", name="Upload Sounds")
+)
+admin.add_view(
+    ThemeSongFileAdmin(
+        os.path.join(basedir, "themes"), "/themes/", name="Upload Theme Songs"
+    )
+)
 
 
 #
 #  Entrance theme (theme song) playback:
 #
+
 
 @asynctask
 def entrance_queue(theme):
@@ -334,7 +360,7 @@ chromatic = range(36, 81)  # Values for the "Chromatic" preset, 36 through 80
 PADMAP = chromatic
 
 # Hardcoded favorite tags to use on the pad.
-DEFAULT = 'random'
+DEFAULT = "random"
 
 
 @asynctask
@@ -345,7 +371,7 @@ def input_main(device_id=None):
         pygame.fastevent.init()
         pygame.midi.init()
     except Exception as error:
-        app.logger.warning('MIDI input disabled: %s', error)
+        app.logger.warning("MIDI input disabled: %s", error)
         return
 
     if device_id is None:
@@ -353,10 +379,10 @@ def input_main(device_id=None):
     else:
         input_id = device_id
     if input_id is None:
-        app.logger.warning('MIDI input disabled: no default MIDI input device')
+        app.logger.warning("MIDI input disabled: no default MIDI input device")
         return
 
-    app.logger.info('using midi input_id: %s', input_id)
+    app.logger.info("using midi input_id: %s", input_id)
     i = pygame.midi.Input(input_id)
     _midi_started = True
     event_get = pygame.fastevent.get
@@ -371,15 +397,17 @@ def input_main(device_id=None):
             if e.type in [KEYDOWN]:
                 going = False
             if e.type in [pygame.midi.MIDIIN]:
-                if e.dict['status'] == 144:  # 144 is note on
+                if e.dict["status"] == 144:  # 144 is note on
                     try:
-                        tagToPlay = TAGMAP[PADMAP.index(e.dict['data1'])]
-                        app.logger.info('play tag %s', tagToPlay)
+                        tagToPlay = TAGMAP[PADMAP.index(e.dict["data1"])]
+                        app.logger.info("play tag %s", tagToPlay)
                     except Exception:
-                        app.logger.warning('no tag defined for pad %s, playing default',
-                                           e.dict['data1'])
+                        app.logger.warning(
+                            "no tag defined for pad %s, playing default",
+                            e.dict["data1"],
+                        )
                         tagToPlay = DEFAULT
-                    playtagunwrapped(tagToPlay, source='midi')
+                    playtagunwrapped(tagToPlay, source="midi")
                 # CC 176 (volume slider) intentionally not handled
 
         if i.poll():
