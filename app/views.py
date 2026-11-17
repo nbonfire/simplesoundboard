@@ -1,9 +1,13 @@
 import base64
 import glob
-import os, shutil
+import os
+import shutil
+from pathlib import Path
 import queue
 from datetime import datetime, timedelta, timezone
 
+import mido
+from mido.ports import multi_receive
 import pygame
 import pygame.midi
 from pygame.locals import KEYDOWN, QUIT
@@ -125,6 +129,7 @@ def index():
 
 @app.route("/fixmusic")
 def fixmusic():
+    Path("music").mkdir(exist_ok=True)
     for tagname in ["FunnyMusic", "*JockJams"]:
         currentmusictag = get_or_create(Tag, name=tagname)
         for currentsound in currentmusictag.sounds:
@@ -191,6 +196,8 @@ def playtag(tagname):
 
 def playtagunwrapped(tagname, source):
     global fxchannel
+    global musicchannel
+
     if not pygame.mixer.get_init():
         pygame.mixer.init()
 
@@ -220,8 +227,10 @@ def playtagunwrapped(tagname, source):
         playtagunwrapped.lasttag[source] = tagname
         playtagunwrapped.lasttagfilename[source] = filetoplay
         playtagunwrapped.lasttagtime[source] = datetime.now(timezone.utc)
-
-    fxchannel.play(pygame.mixer.Sound(filetoplay))
+    if tagname in ["*JockJams", "FunnyMusic"]:
+        musicchannel.play(pygame.mixer.Sound(filetoplay))
+    else:
+        fxchannel.play(pygame.mixer.Sound(filetoplay))
     return filetoplay
 
 
@@ -370,6 +379,7 @@ def entrance_queue(theme):
 chromatic = range(36, 81)  # Values for the "Chromatic" preset, 36 through 80
 
 PADMAP = chromatic
+PADMAP = [49, 57, 53, 51, 48, 47, 45, 43, 37, 39, 56, 44, 36, 40, 42, 48]
 
 # Hardcoded favorite tags to use on the pad.
 DEFAULT = "random"
@@ -378,58 +388,76 @@ DEFAULT = "random"
 @asynctask
 def input_main(device_id=None):
     global _midi_started
+
     try:
-        pygame.init()
-        pygame.fastevent.init()
-        pygame.midi.init()
+        # pygame.init()
+        # pygame.fastevent.init()
+        # pygame.midi.init()
+        print(mido.get_input_names())
     except Exception as error:
         app.logger.warning("MIDI input disabled: %s", error)
         return
 
-    if device_id is None:
-        input_id = pygame.midi.get_default_input_id()
-    else:
-        input_id = device_id
-    if input_id is None:
-        app.logger.warning("MIDI input disabled: no default MIDI input device")
-        return
+    inports = [
+        mido.open_input(name, callback=playtagcallback)
+        for name in mido.get_input_names()
+    ]
 
-    app.logger.info("using midi input_id: %s", input_id)
-    i = pygame.midi.Input(input_id)
-    _midi_started = True
-    event_get = pygame.fastevent.get
-    event_post = pygame.fastevent.post
 
-    going = True
-    while going:
-        events = event_get()
-        for e in events:
-            if e.type in [QUIT]:
-                going = False
-            if e.type in [KEYDOWN]:
-                going = False
-            if e.type in [pygame.midi.MIDIIN]:
-                if e.dict["status"] == 144:  # 144 is note on
-                    try:
-                        tagToPlay = TAGMAP[PADMAP.index(e.dict["data1"])]
-                        app.logger.info("play tag %s", tagToPlay)
-                    except Exception:
-                        app.logger.warning(
-                            "no tag defined for pad %s, playing default",
-                            e.dict["data1"],
-                        )
-                        tagToPlay = DEFAULT
-                    playtagunwrapped(tagToPlay, source="midi")
-                # CC 176 (volume slider) intentionally not handled
+#    try:
+#        for port, msg in multi_receive(inports, yield_ports=True):
+#            print(f"[{port.name}] {msg}")
 
-        if i.poll():
-            midi_events = i.read(10)
+#    if device_id is None:
+#        input_id = pygame.midi.get_default_input_id()
+#    else:
+#        input_id = device_id
+#    if input_id is None:
+#        app.logger.warning("MIDI input disabled: no default MIDI input device")
+#        return
 
-            # convert them into pygame events.
-            midi_evs = pygame.midi.midis2events(midi_events, i.device_id)
+#    app.logger.info("using midi input_id: %s", input_id)
+#    i = pygame.midi.Input(input_id)
+#    _midi_started = True
+#    event_get = pygame.fastevent.get
+#    event_post = pygame.fastevent.post
 
-            for m_e in midi_evs:
-                event_post(m_e)
+#    going = True
+#    while going:
+#        events = event_get()
+#        for e in events:
+#            if e.type in [QUIT]:
+#                going = False
+#            if e.type in [KEYDOWN]:
+#                going = False
+#            if e.type in [pygame.midi.MIDIIN]:
+#                if e.dict["status"] == 144:  # 144 is note on
+#                    try:
+#                        tagToPlay = TAGMAP[PADMAP.index(e.dict["data1"])]
+#                        app.logger.info("play tag %s", tagToPlay)
+#                    except Exception:
+#                        app.logger.warning(
+#                            "no tag defined for pad %s, playing default",
+#                            e.dict["data1"],
+#                                #                        )
+#                        tagToPlay = DEFAULT
+#                    playtagunwrapped(tagToPlay, source="midi")
+# CC 176 (volume slider) intentionally not handled
 
-    del i
-    pygame.midi.quit()
+#        if i.poll():
+#            midi_events = i.read(10)
+
+# convert them into pygame events.
+#           midi_evs = pygame.midi.midis2events(midi_events, i.device_id)
+
+#            for m_e in midi_evs:
+#                event_post(m_e)
+#
+# del i
+# pygame.midi.quit()
+
+
+def playtagcallback(message):
+    print(message)
+    if message.type == "note_on":
+        playtagunwrapped(TAGMAP[PADMAP.index(message.note)], source="midi")

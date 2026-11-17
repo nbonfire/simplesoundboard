@@ -1,23 +1,24 @@
-#config.py
+# config.py
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'soundboardtags.sqlite')
+SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, "soundboardtags.sqlite")
 CSRF_ENABLED = True
-SECRET_KEY = 'you-will-never-guess'
+SECRET_KEY = "you-will-never-guess"
 
 # HTTP Basic auth for the admin panel, "user:password"
-BASIC_AUTH = os.environ.get('SOUNDBOARD_BASIC_AUTH', 'admin:admin')
+BASIC_AUTH = os.environ.get("SOUNDBOARD_BASIC_AUTH", "admin:admin")
 
 # Enable the MIDI control-pad listener (requires a MIDI input device)
-MIDI_INPUT_ENABLED = os.environ.get('SOUNDBOARD_MIDI') == '1'
+MIDI_INPUT_ENABLED = os.environ.get("SOUNDBOARD_MIDI") == "1"
+MIDI_INPUT_DEVICE = os.environ.get("SOUNDBOARD_MIDI_DEVICE")
 
 # mail server settings (error logging)
-MAIL_SERVER = 'localhost'
+MAIL_SERVER = "localhost"
 MAIL_PORT = 25
 MAIL_USERNAME = None
 MAIL_PASSWORD = None
 
 # administrator list
-ADMINS = ['someone@nospam.net', 'someoneelse@nospam.com']
+ADMINS = ["someone@nospam.net", "someoneelse@nospam.com"]
