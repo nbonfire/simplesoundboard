@@ -1,6 +1,6 @@
 import base64
 import glob
-import os
+import os, shutil
 import queue
 from datetime import datetime, timedelta, timezone
 
@@ -121,6 +121,18 @@ def index():
         filenamesandcategories=tagsandsounds,
         jqueryurl=url_for("static", filename="js/jquery.min.js"),
     )
+
+
+@app.route("/fixmusic")
+def fixmusic():
+    for tagname in ["FunnyMusic", "*JockJams"]:
+        currentmusictag = get_or_create(Tag, name=tagname)
+        for currentsound in currentmusictag.sounds:
+            if currentsound.filename.startswith("sounds"):
+                newname = "music" + currentsound.filename.removeprefix("sounds")
+                shutil.move(currentsound.filename, newname)
+                currentsound.filename = newname
+    return "ok"
 
 
 @app.route("/load")
