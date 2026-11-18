@@ -372,13 +372,21 @@ PADMAP = chromatic
 DEFAULT = "random"
 
 def playtagcallback(message):
-    print(message)
-    if message.type == "note_on":
-        print(
-            f"{message.note} {PADMAP.index(message.note)} {TAGMAP[PADMAP.index(message.note)]}"
-        )
-        playtagunwrapped(TAGMAP[PADMAP.index(message.note)], source="midi")
+    try:
+      if message.type == 'note_on' and message.velocity > 0:
+        if message.note not in PADMAP:
+          print(f'Unmapped MIDI note received: {message.note}', flush=True)
+          return
 
+        pad_idx = PADMAP.index(message.note)
+        tag = TAGMAP[pad_idx]
+
+        print(f'{message.note} {pad_idx} {tag}', flush=True)
+        playtagunwrapped(tag, source='midi')
+
+    except Exception:
+      # Forces the hidden background thread error to print to your terminal
+      traceback.print_exc()
 
 #@asynctask
 def input_main(device_id=None):
