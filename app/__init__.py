@@ -58,7 +58,5 @@ for _content_dir in ("sounds", "themes"):
 from app import views, models  # noqa: E402
 
 if app.config["MIDI_INPUT_ENABLED"]:
-    if app.config["MIDI_INPUT_DEVICE"]:
-        views.input_main(app.config["MIDI_INPUT_DEVICE"])
-    else:
-        views.input_main()
+
+    midiports=views.input_main()

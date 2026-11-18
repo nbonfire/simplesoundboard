@@ -5,6 +5,8 @@ import shutil
 from pathlib import Path
 import queue
 from datetime import datetime, timedelta, timezone
+import time
+import traceback
 
 import mido
 from mido.ports import multi_receive
@@ -369,8 +371,16 @@ PADMAP = chromatic
 # Hardcoded favorite tags to use on the pad.
 DEFAULT = "random"
 
+def playtagcallback(message):
+    print(message)
+    if message.type == "note_on":
+        print(
+            f"{message.note} {PADMAP.index(message.note)} {TAGMAP[PADMAP.index(message.note)]}"
+        )
+        playtagunwrapped(TAGMAP[PADMAP.index(message.note)], source="midi")
 
-@asynctask
+
+#@asynctask
 def input_main(device_id=None):
     global _midi_started
 
@@ -387,13 +397,17 @@ def input_main(device_id=None):
         mido.open_input(name, callback=playtagcallback)
         for name in mido.get_input_names()
     ]
-
-    try:
-        for port, msg in multi_receive(inports, yield_ports=True):
-            print(f"[{port.name}] {msg}")
-            playtagcallback(msg)
-    except Exception as error:
-        return
+    return inports
+#    try:
+#    #for port, msg in multi_receive(inports, yield_ports=True):
+#    #    print(msg)
+#        while True:
+#            time.sleep(0.1)
+#    except KeyboardInterrupt:
+#        pass
+#    finally:
+#        for port in inports:
+#            port.close()
 
 
 #    if device_id is None:
@@ -444,8 +458,3 @@ def input_main(device_id=None):
 # del i
 # pygame.midi.quit()
 
-
-def playtagcallback(message):
-    print(message)
-    if message.type == "note_on":
-        playtagunwrapped(TAGMAP[PADMAP.index(message.note)], source="midi")
