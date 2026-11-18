@@ -19,7 +19,7 @@ from flask_admin.contrib.sqla import ModelView
 from sqlalchemy.sql.expression import func
 
 from app import admin, app, db, lm
-from config import basedir
+from config import basedir, TAGMAP
 from app.decorators import asynctask
 from app.forms import EditForm
 from app.models import Sound, Tag, ThemeSong, User, get_or_create, stripfilename
@@ -30,24 +30,6 @@ musicchannel = pygame.mixer.Channel(2)
 
 clock = pygame.time.Clock()
 
-TAGMAP = [
-    "*Waiting",
-    "*TrashTalk",
-    "*FunnyMusic",
-    "random",
-    "*Comeback",
-    "*Blowout",
-    "*Setup",
-    "*GameOver",
-    "*Windowshopping",
-    "*Fuckup",
-    "*BigSave",
-    "*FireExtinguished",
-    "*NiceGoal",
-    "*JockJams",
-    "*OneTimer",
-    "*OnFire",
-]
 
 _theme_queue = queue.Queue()
 _entrance_played = False
