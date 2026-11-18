@@ -33,7 +33,7 @@ clock = pygame.time.Clock()
 TAGMAP = [
     "*Waiting",
     "*TrashTalk",
-    "FunnyMusic",
+    "*FunnyMusic",
     "random",
     "*Comeback",
     "*Blowout",
@@ -130,7 +130,7 @@ def index():
 @app.route("/fixmusic")
 def fixmusic():
     Path("music").mkdir(exist_ok=True)
-    for tagname in ["FunnyMusic", "*JockJams"]:
+    for tagname in ["*FunnyMusic", "*JockJams"]:
         currentmusictag = get_or_create(Tag, name=tagname)
         for currentsound in currentmusictag.sounds:
             if currentsound.filename.startswith("sounds"):
@@ -228,7 +228,7 @@ def playtagunwrapped(tagname, source):
         playtagunwrapped.lasttag[source] = tagname
         playtagunwrapped.lasttagfilename[source] = filetoplay
         playtagunwrapped.lasttagtime[source] = datetime.now(timezone.utc)
-    if tagname in ["*JockJams", "FunnyMusic"]:
+    if tagname in ["*JockJams", "*FunnyMusic"]:
         musicchannel.play(pygame.mixer.Sound(filetoplay))
     else:
         fxchannel.play(pygame.mixer.Sound(filetoplay))
