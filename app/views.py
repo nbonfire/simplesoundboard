@@ -137,6 +137,7 @@ def fixmusic():
                 newname = "music" + currentsound.filename.removeprefix("sounds")
                 shutil.move(currentsound.filename, newname)
                 currentsound.filename = newname
+    db.session.commit()
     return "ok"
 
 
