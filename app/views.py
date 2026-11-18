@@ -380,7 +380,7 @@ def entrance_queue(theme):
 chromatic = range(36, 81)  # Values for the "Chromatic" preset, 36 through 80
 
 PADMAP = chromatic
-PADMAP = [49, 57, 53, 51, 48, 47, 45, 43, 37, 39, 56, 44, 36, 40, 42, 48]
+# PADMAP = [49, 57, 53, 51, 48, 47, 45, 43, 37, 39, 56, 44, 36, 40, 42, 48]
 
 # Hardcoded favorite tags to use on the pad.
 DEFAULT = "random"
