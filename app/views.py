@@ -135,7 +135,9 @@ def fixmusic():
         for currentsound in currentmusictag.sounds:
             if currentsound.filename.startswith("sounds"):
                 newname = "music" + currentsound.filename.removeprefix("sounds")
-                shutil.move(currentsound.filename, newname)
+                src = Path(currentsound.filename)
+                if src.is_file():
+                    shutil.move(src, Path(newname))
                 currentsound.filename = newname
     db.session.commit()
     return "ok"
