@@ -22,3 +22,22 @@ MAIL_PASSWORD = None
 
 # administrator list
 ADMINS = ["someone@nospam.net", "someoneelse@nospam.com"]
+
+TAGMAP = [
+    "*Waiting",
+    "*TrashTalk",
+    "*FunnyMusic",
+    "random",
+    "*Comeback",
+    "*Blowout",
+    "*Setup",
+    "*GameOver",
+    "*Windowshopping",
+    "*Fuckup",
+    "*BigSave",
+    "*FireExtinguished",
+    "*NiceGoal",
+    "*JockJams",
+    "*OneTimer",
+    "*OnFire",
+]
