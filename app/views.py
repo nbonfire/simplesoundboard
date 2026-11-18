@@ -388,10 +388,13 @@ def input_main(device_id=None):
         for name in mido.get_input_names()
     ]
 
+    try:
+        for port, msg in multi_receive(inports, yield_ports=True):
+            print(f"[{port.name}] {msg}")
+            playtagcallback(msg)
+    except Exception as error:
+        return
 
-#    try:
-#        for port, msg in multi_receive(inports, yield_ports=True):
-#            print(f"[{port.name}] {msg}")
 
 #    if device_id is None:
 #        input_id = pygame.midi.get_default_input_id()

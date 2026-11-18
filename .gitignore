@@ -17,6 +17,6 @@ themes/
 *.mp3
 *.wav
 static/images/*
-
+config.py
 # Legacy
 flask/
