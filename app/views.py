@@ -37,7 +37,7 @@ TAGMAP = [
     "random",
     "*Comeback",
     "*Blowout",
-    "*CloseGame",
+    "*Setup",
     "*GameOver",
     "*Windowshopping",
     "*Fuckup",
