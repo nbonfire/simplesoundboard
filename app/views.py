@@ -2,6 +2,7 @@ import base64
 import glob
 import os
 import shutil
+from functools import partial
 from pathlib import Path
 import queue
 from datetime import datetime, timedelta, timezone
@@ -366,29 +367,30 @@ def entrance_queue(theme):
 chromatic = range(36, 81)  # Values for the "Chromatic" preset, 36 through 80
 
 PADMAP = chromatic
-# PADMAP = [49, 57, 53, 51, 48, 47, 45, 43, 37, 39, 56, 44, 36, 40, 42, 48]
+#PADMAP = [49, 57, 53, 51, 48, 47, 45, 43, 37, 39, 56, 44, 36, 40, 42, 48]
 
 # Hardcoded favorite tags to use on the pad.
 DEFAULT = "random"
 
-def playtagcallback(message):
-    try:
-      if message.type == 'note_on' and message.velocity > 0:
-        if message.note not in PADMAP:
-          print(f'Unmapped MIDI note received: {message.note}', flush=True)
-          return
 
-        pad_idx = PADMAP.index(message.note)
-        tag = TAGMAP[pad_idx]
+def playtagcallback(message, app):
+  try:
+    if message.type == 'note_on' and message.velocity > 0:
+      if message.note not in PADMAP:
+        return
 
-        print(f'{message.note} {pad_idx} {tag}', flush=True)
+      pad_idx = PADMAP.index(message.note)
+      tag = TAGMAP[pad_idx]
+      print(f'{message.note} {pad_idx} {tag}', flush=True)
+
+      # Push the Flask application context for this background thread
+      with app.app_context():
         playtagunwrapped(tag, source='midi')
 
-    except Exception:
-      # Forces the hidden background thread error to print to your terminal
-      traceback.print_exc()
+  except Exception:
+    traceback.print_exc()
 
-#@asynctask
+# @asynctask
 def input_main(device_id=None):
     global _midi_started
 
@@ -402,10 +404,12 @@ def input_main(device_id=None):
         return
 
     inports = [
-        mido.open_input(name, callback=playtagcallback)
+        mido.open_input(name, callback=partial(playtagcallback, app=app))
         for name in mido.get_input_names()
     ]
     return inports
+
+
 #    try:
 #    #for port, msg in multi_receive(inports, yield_ports=True):
 #    #    print(msg)
@@ -465,4 +469,3 @@ def input_main(device_id=None):
 #
 # del i
 # pygame.midi.quit()
-
